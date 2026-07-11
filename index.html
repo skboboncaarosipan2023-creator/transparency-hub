@@ -15,13 +15,13 @@
 </head>
 <body>
 
-    <!-- HIGHEST PRIORITY STICKY ANNOUNCEMENT BAR -->
-    <div id="sticky-announcement" class="announcement-banner hidden">
-        <div class="announcement-content">
-            <span class="announcement-badge"><i class="fa-solid fa-bullhorn"></i> IMPORTANT</span>
-            <p id="announcement-text">Mabuhay! Registration for the upcoming Youth Capability Seminar is now ongoing. Please visit the Barangay Hall for more details.</p>
-        </div>
+   <!-- EMERGENCY ANNOUNCEMENT BAR -->
+<div id="emergency-announcement" class="announcement-banner hidden" style="background: #ef4444; color: white;">
+    <div class="announcement-content">
+        <span class="announcement-badge"><i class="fa-solid fa-triangle-exclamation"></i> URGENT</span>
+        <p id="emergency-text"></p>
     </div>
+</div>
 
     <!-- FULL-WIDTH EDGE-TO-EDGE IMMERSIVE BANNER -->
     <header class="hero-banner immersive-hero">
@@ -74,8 +74,8 @@
             </div>
         </section>
 
-        <!-- ==========================================
-             CENTER PANEL: STRATEGIC PLAN, PROJECTS, FEEDBACK FORMS
+<!-- ==========================================
+             CENTER PANEL: STRATEGIC PLAN, BULLETIN, PROJECTS, FEEDBACK FORMS
              ========================================== -->
         <div class="dashboard-panel center-column">
             
@@ -105,7 +105,25 @@
                 </div>
             </section>
 
-            <!-- SECTION 2: LIVE PROJECT PIPELINE -->
+            <!-- SECTION 2: NEW PERMANENT BULLETIN BOARD -->
+            <section id="bulletin" class="center-section-block">
+                <div class="section-header hub-header" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 1.5rem; border-radius: 12px 12px 0 0; color: white;">
+                    <h2 style="color: white; margin: 0;"><i class="fa-solid fa-bullhorn"></i> Barangay Bulletin Board</h2>
+                    <p style="color: #bfdbfe; margin: 4px 0 0 0;">General updates and active announcements from the council.</p>
+                </div>
+                
+                <!-- This container uses your clean styling layout -->
+                <div class="form-container" style="border-top-left-radius: 0; border-top-right-radius: 0; padding: 20px; background: #ffffff;">
+                    <!-- Target element where app.js injects your row 3 spreadsheet message -->
+                    <div id="general-bulletin-container">
+                        <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+                            <i class="fa-solid fa-circle-notch spinner"></i> Loading latest announcements...
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: LIVE PROJECT PIPELINE -->
             <section id="projects" class="center-section-block">
                 <div class="section-header tracker-header">
                     <h2>Live Project Pipeline</h2>
@@ -127,7 +145,7 @@
                 </div>
             </section>
 
-            <!-- SECTION 3: INTERACTIVE VOICE & FEEDBACK FORMS -->
+            <!-- SECTION 4: INTERACTIVE VOICE & FEEDBACK FORMS -->
             <section id="youth-voice" class="center-section-block">
                 <div class="section-header hub-header">
                     <h2>Youth Voice Hub</h2>
@@ -161,23 +179,23 @@
                     </form>
 
                     <!-- Form 2: Direct Contact (Personal Messaging) -->
-                            <form id="contact-form" class="hub-form hidden">
-                                <div class="official-email-badge" style="background: var(--brand-blue-light); padding: 0.6rem; border-radius: var(--radius-md); font-size: 0.725rem; color: var(--brand-blue); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                    <i class="fa-solid fa-envelope-open-text"></i>
-                                    <span>Direct Email: <a href="mailto:skboboncaarosipan@gmail.com" style="color: var(--brand-blue); font-weight: 700; text-decoration: underline;">skboboncaarosipan@gmail.com</a></span>
-                                </div>
+                    <form id="contact-form" class="hub-form hidden">
+                        <div class="official-email-badge" style="background: var(--brand-blue-light); padding: 0.6rem; border-radius: var(--radius-md); font-size: 0.725rem; color: var(--brand-blue); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                            <span>Direct Email: <a href="mailto:skboboncaarosipan@gmail.com" style="color: var(--brand-blue); font-weight: 700; text-decoration: underline;">skboboncaarosipan@gmail.com</a></span>
+                        </div>
 
-                                <label for="contact-name">Your Full Name</label>
-                                <input type="text" id="contact-name" placeholder="Juan Dela Cruz" required>
+                        <label for="contact-name">Your Full Name</label>
+                        <input type="text" id="contact-name" placeholder="Juan Dela Cruz" required>
 
-                                <label for="contact-email">Your Email or Contact Number</label>
-                                <input type="text" id="contact-email" placeholder="0917xxxxxxx" required>
+                        <label for="contact-email">Your Email or Contact Number</label>
+                        <input type="text" id="contact-email" placeholder="0917xxxxxxx" required>
 
-                                <label for="contact-message">Your Message</label>
-                                <textarea id="contact-message" placeholder="Type your message to the council..." rows="3" required></textarea>
+                        <label for="contact-message">Your Message</label>
+                        <textarea id="contact-message" placeholder="Type your message to the council..." rows="3" required></textarea>
 
-                                <button type="submit" class="submit-btn contact-submit">Send Message</button>
-                            </form>
+                        <button type="submit" class="submit-btn contact-submit">Send Message</button>
+                    </form>
 
                     <div id="form-alert" class="status-box success-box hidden">
                         <i class="fa-solid fa-circle-check"></i>
