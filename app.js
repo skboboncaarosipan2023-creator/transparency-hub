@@ -5,10 +5,12 @@ const SHEET_ID = '1bkhpqGTzS1_NehWzCEfnpAy5gaz9NZldEIVq7gs04OM';
 const SHEET_TAB_NAME = 'Projects';
 const MEMBERS_TAB_NAME = 'Members';
 const SLIDESHOW_TAB_NAME = 'Slideshow';
+const ANNOUNCEMENT_TAB_NAME = 'Announcement';
 
 const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_TAB_NAME}`;
 const COUNCIL_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${MEMBERS_TAB_NAME}`;
 const SLIDESHOW_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SLIDESHOW_TAB_NAME}`;
+const ANNOUNCEMENT_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${ANNOUNCEMENT_TAB_NAME}`;
 
 // Your Active Google Apps Script Web App Deployment URL
 const FEEDBACK_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiDIQb7zpIFdbbHwH9gld2nbXDhn7hUU5ls9oY2NKznAGMbVif4Wmqc0obtKTU79_R/exec';
@@ -39,6 +41,28 @@ function verifyAnnouncementVisibility(announcementText) {
         announcementBar.style.display = 'block'; // Shows it if there is real text
         announcementBar.innerText = announcementText;
         body.style.paddingTop = '40px';         // Pushes the site down so it fits nicely
+    }
+}
+
+/**
+ * Fetches the announcement text from its own dedicated sheet tab
+ */
+async function fetchLiveAnnouncement() {
+    try {
+        const response = await fetch(ANNOUNCEMENT_DATA_URL);
+        if (!response.ok) throw new Error("Announcement connection anomaly.");
+        
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+
+        if (cleanRows.length > 0 && cleanRows[0][0]) {
+            verifyAnnouncementVisibility(cleanRows[0][0]);
+        } else {
+            verifyAnnouncementVisibility("");
+        }
+    } catch (err) {
+        console.error("Announcement engine exception:", err);
+        verifyAnnouncementVisibility("");
     }
 }
 
@@ -187,14 +211,6 @@ async function fetchLiveProjects() {
 
         const cleanRows = parseCSV(dataText);
 
-        // Dynamic Announcement Controller Integration
-        if (cleanRows.length > 1 && cleanRows[1][0]) {
-            const liveAnnouncementText = cleanRows[1][0]; 
-            verifyAnnouncementVisibility(liveAnnouncementText);
-        } else {
-            verifyAnnouncementVisibility("");
-        }
-
         if (cleanRows.length <= 1) {
             loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #94a3b8;">No active records posted currently.</p>`;
             return;
@@ -202,8 +218,8 @@ async function fetchLiveProjects() {
 
         gridContainer.innerHTML = '';
 
-        // Project loop starts at i = 2 assuming row 2 handles the global announcement configuration
-        for (let i = 2; i < cleanRows.length; i++) { 
+        // Starts perfectly at index 1 so all projects load beautifully
+        for (let i = 1; i < cleanRows.length; i++) { 
             const row = cleanRows[i];
             if (row.length < 3 || !row[0]) continue; 
 
@@ -395,6 +411,7 @@ function setupFAQEngine() {
 
 // Bind interactive event hooks securely into the global runtime stack loading phase
 window.addEventListener('DOMContentLoaded', () => {
+    fetchLiveAnnouncement();
     fetchLiveSlideshow(); 
     fetchLiveCouncil();
     fetchLiveProjects();
