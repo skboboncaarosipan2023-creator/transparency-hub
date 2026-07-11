@@ -5,12 +5,13 @@ const SHEET_ID = '1bkhpqGTzS1_NehWzCEfnpAy5gaz9NZldEIVq7gs04OM';
 const SHEET_TAB_NAME = 'Projects';
 const MEMBERS_TAB_NAME = 'Members';
 const SLIDESHOW_TAB_NAME = 'Slideshow';
-const ANNOUNCEMENT_TAB_NAME = 'Announcement';
 
-const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_TAB_NAME}`;
-const COUNCIL_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${MEMBERS_TAB_NAME}`;
-const SLIDESHOW_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SLIDESHOW_TAB_NAME}`;
-const ANNOUNCEMENT_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${ANNOUNCEMENT_TAB_NAME}`;
+// Auto-generated cache-buster to instantly pull live updates from your Google Sheet
+const cacheBuster = `&cb=${new Date().getTime()}`;
+
+const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_TAB_NAME}${cacheBuster}`;
+const COUNCIL_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${MEMBERS_TAB_NAME}${cacheBuster}`;
+const SLIDESHOW_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SLIDESHOW_TAB_NAME}${cacheBuster}`;
 
 // Your Active Google Apps Script Web App Deployment URL
 const FEEDBACK_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiDIQb7zpIFdbbHwH9gld2nbXDhn7hUU5ls9oY2NKznAGMbVif4Wmqc0obtKTU79_R/exec';
@@ -27,179 +28,42 @@ function parseCSV(text) {
 }
 
 /**
- * Monitors the Sticky Announcement string values and hides the component framework if empty
+ * Controls the top-level high-priority Emergency Banner layout
  */
-function verifyAnnouncementVisibility(announcementText) {
-    const announcementBar = document.getElementById('sticky-announcement');
-    const announcementPara = document.getElementById('announcement-text');
+function processEmergencyAlert(alertText) {
+    const emergencyBar = document.getElementById('emergency-announcement');
+    const emergencyPara = document.getElementById('emergency-text');
 
-    // Safety check: If the element isn't in index.html, exit quietly so the site never breaks!
-    if (!announcementBar) {
-        console.warn("Warning: HTML element with ID 'sticky-announcement' was not found.");
-        return;
-    }
+    if (!emergencyBar) return;
 
-    // Check if text is empty, just spaces, or explicitly set to N/A
-    if (!announcementText || announcementText.trim() === "" || announcementText.trim() === "N/A") {
-        announcementBar.classList.add('hidden'); // Uses your CSS hidden class to remove it visually
+    if (!alertText || alertText.trim() === "" || alertText.trim() === "N/A" || alertText.trim().toLowerCase() === "none") {
+        emergencyBar.style.setProperty('display', 'none', 'important');
     } else {
-        announcementBar.classList.remove('hidden'); // Shows it if there is real text
-        if (announcementPara) {
-            announcementPara.innerText = announcementText; // Replaces placeholder text with live sheet data
-        }
+        emergencyBar.style.setProperty('display', 'flex', 'important');
+        if (emergencyPara) emergencyPara.innerText = alertText;
     }
 }
 
 /**
- * Fetches the announcement text from its own dedicated sheet tab
+ * Renders the brand new permanent Bulletin board text in the middle section
  */
-async function fetchLiveAnnouncement() {
-    try {
-        const response = await fetch(ANNOUNCEMENT_DATA_URL);
-        if (!response.ok) throw new Error("Announcement connection anomaly.");
-        
-        const dataText = await response.text();
-        const cleanRows = parseCSV(dataText);
+function processGeneralBulletin(bulletinText) {
+    const bulletinContainer = document.getElementById('general-bulletin-container');
+    if (!bulletinContainer) return;
 
-        if (cleanRows.length > 0 && cleanRows[0][0]) {
-            verifyAnnouncementVisibility(cleanRows[0][0]);
-        } else {
-            verifyAnnouncementVisibility("");
-        }
-    } catch (err) {
-        console.error("Announcement engine exception:", err);
-        verifyAnnouncementVisibility("");
+    if (!bulletinText || bulletinText.trim() === "" || bulletinText.trim() === "N/A") {
+        bulletinContainer.innerHTML = `<p style="font-size: 14px; color: #94a3b8; font-style: italic;">No active council announcements posted at this moment.</p>`;
+    } else {
+        bulletinContainer.innerHTML = `
+            <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px; border-radius: 4px;">
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; font-weight: 500;">${bulletinText}</p>
+            </div>
+        `;
     }
 }
 
 /**
- * Fetches image configurations dynamically from the Google Sheet and builds the backdrop slides
- */
-async function fetchLiveSlideshow() {
-    const slideshowContainer = document.getElementById('hero-bg-slideshow');
-
-    try {
-        const response = await fetch(SLIDESHOW_DATA_URL);
-        if (!response.ok) throw new Error("Slideshow connection anomaly.");
-        
-        const dataText = await response.text();
-        const cleanRows = parseCSV(dataText);
-
-        if (cleanRows.length <= 1) {
-            slideshowContainer.style.backgroundColor = "#0f172a";
-            return;
-        }
-
-        slideshowContainer.innerHTML = '';
-
-        for (let i = 1; i < cleanRows.length; i++) {
-            const row = cleanRows[i];
-            if (!row[0]) continue; 
-
-            const imageUrl = row[0];
-
-            slideshowContainer.innerHTML += `
-                <div class="custom-slide fade">
-                    <img src="${imageUrl}" alt="SK Documentation Slide">
-                </div>
-            `;
-        }
-
-        slideTrackerIndex = 0;
-        runLiveSlideshow();
-
-    } catch (err) {
-        console.error("Slideshow engine runtime exception:", err);
-        slideshowContainer.style.backgroundColor = "#0f172a";
-    }
-}
-
-/**
- * Rotates the dynamically loaded slideshow frames smoothly
- */
-let slideTrackerIndex = 0;
-
-function runLiveSlideshow() {
-    const slides = document.getElementsByClassName("custom-slide");
-    if (slides.length === 0) return;
-
-    for (let i = 0; i < slides.length; i++) {
-        slides[i].style.display = "none";
-    }
-
-    slideTrackerIndex++;
-    if (slideTrackerIndex > slides.length) { 
-        slideTrackerIndex = 1; 
-    }
-
-    slides[slideTrackerIndex - 1].style.display = "block";
-    setTimeout(runLiveSlideshow, 4500);
-}
-
-/**
- * Pulls and renders the dynamic SK Council Directory profiles
- */
-async function fetchLiveCouncil() {
-    const gridContainer = document.getElementById('council-grid');
-    const loadingIndicator = document.getElementById('council-loading-state');
-
-    try {
-        const response = await fetch(COUNCIL_DATA_URL);
-        if (!response.ok) throw new Error("Council connection anomaly.");
-        
-        const dataText = await response.text();
-        const cleanRows = parseCSV(dataText);
-
-        if (cleanRows.length <= 1) {
-            loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #94a3b8;">No council records posted currently.</p>`;
-            return;
-        }
-
-        gridContainer.innerHTML = '';
-
-        for (let i = 1; i < cleanRows.length; i++) {
-            const row = cleanRows[i];
-            if (row.length < 3 || !row[0]) continue; 
-
-            const role = row[0];
-            const name = row[1];
-            const purok = row[2] || 'Unassigned';
-            const contact = row[3] || 'No contact provided';
-
-            const lowerRole = role.toLowerCase();
-            let cardClass = 'member-card';
-
-            if (lowerRole.includes('chair') || lowerRole.includes('kapitan')) {
-                cardClass = 'member-card chairperson-card';
-            } else if (lowerRole.includes('secretary') || lowerRole.includes('treasurer')) {
-                cardClass = 'member-card executive-card';
-            }
-
-            gridContainer.innerHTML += `
-                <div class="${cardClass}">
-                    <span class="member-role">${role}</span>
-                    <h3 class="member-name">${name}</h3>
-                    <span class="member-purok">
-                        <i class="fa-solid fa-location-dot"></i> ${purok}
-                    </span>
-                    <div class="member-contact">
-                        <i class="fa-solid fa-phone"></i> ${contact}
-                    </div>
-                </div>
-            `;
-        }
-
-        loadingIndicator.classList.add('hidden');
-        gridContainer.classList.remove('hidden');
-
-    } catch (err) {
-        console.error("Council engine exception:", err);
-        loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #ef4444;">Failed to load dynamic directory profiles.</p>`;
-    }
-}
-
-/**
- * Pulls and renders the project trackers from the primary sheet tab
+ * Pulls, segregates, and renders announcements and project trackers together
  */
 async function fetchLiveProjects() {
     const gridContainer = document.getElementById('project-grid');
@@ -208,30 +72,39 @@ async function fetchLiveProjects() {
 
     try {
         const response = await fetch(DATA_URL);
-        if (!response.ok) throw new Error("Google Sheet access denied. Check sharing settings.");
+        if (!response.ok) throw new Error("Google Sheet access denied.");
         
         const dataText = await response.text();
-        if (dataText.includes('<!DOCTYPE html>')) {
-            throw new Error("Google Sheet is private. Change permission to 'Anyone with the link can view'.");
-        }
-
         const cleanRows = parseCSV(dataText);
 
         if (cleanRows.length <= 1) {
-            loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #94a3b8;">No active records posted currently.</p>`;
+            processEmergencyAlert("");
+            processGeneralBulletin("");
+            if (loadingIndicator) loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #94a3b8;">No records posted currently.</p>`;
             return;
         }
 
-        gridContainer.innerHTML = '';
+        // 1. Extract Emergency Alert from Row 2, Column A (index [1][0])
+        const rawEmergency = cleanRows[1] ? cleanRows[1][0] : "";
+        processEmergencyAlert(rawEmergency);
 
-        for (let i = 1; i < cleanRows.length; i++) { 
+        // 2. Extract General Announcement from Row 3, Column A (index [2][0])
+        const rawGeneral = cleanRows[2] ? cleanRows[2][0] : "";
+        processGeneralBulletin(rawGeneral);
+
+        if (gridContainer) gridContainer.innerHTML = '';
+
+        // 3. Project pipeline loop now starts safely from Row 4 (index i = 3) downwards!
+        let projectCount = 0;
+        for (let i = 3; i < cleanRows.length; i++) { 
             const row = cleanRows[i];
-            if (row.length < 3 || !row[0]) continue; 
+            if (!row || row.length < 3 || !row[0]) continue; 
 
+            projectCount++;
             const title = row[0];
             const date = row[1] || 'N/A';
             const status = row[2] || 'Planning';
-            const details = row[3] || 'No specific description logged.';
+            const details = row[3] || 'No description logged.';
 
             let badgeStyleClass = 'status-badge'; 
             let statusMarkup = status;
@@ -248,175 +121,172 @@ async function fetchLiveProjects() {
                 badgeStyleClass += ' badge-planning';
             }
 
-            gridContainer.innerHTML += `
-                <div class="project-card">
-                    <div>
-                        <div class="card-top">
-                            <h3>${title}</h3>
-                            <span class="${badgeStyleClass}">
-                                ${statusMarkup}
-                            </span>
+            if (gridContainer) {
+                gridContainer.innerHTML += `
+                    <div class="project-card">
+                        <div>
+                            <div class="card-top">
+                                <h3>${title}</h3>
+                                <span class="${badgeStyleClass}">${statusMarkup}</span>
+                            </div>
+                            <p class="card-details">${details}</p>
                         </div>
-                        <p class="card-details">${details}</p>
+                        <div class="card-footer">
+                            <i class="fa-regular fa-calendar"></i> Target execution: ${date}
+                        </div>
                     </div>
-                    <div class="card-footer">
-                        <i class="fa-regular fa-calendar"></i> Target execution: ${date}
-                    </div>
-                </div>
-            `;
+                `;
+            }
         }
 
-        loadingIndicator.classList.add('hidden');
-        gridContainer.classList.remove('hidden');
+        if (projectCount === 0 && loadingIndicator) {
+            loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #94a3b8;">No active project tracking records logged.</p>`;
+            return;
+        }
+
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (gridContainer) gridContainer.classList.remove('hidden');
 
     } catch (err) {
-        console.error("Pipeline Exception:", err);
-        loadingIndicator.classList.add('hidden');
-        errorIndicator.classList.remove('hidden');
-        errorIndicator.querySelector('p').innerText = err.message;
+        console.error("Pipeline Engine Error:", err);
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (errorIndicator) {
+            errorIndicator.classList.remove('hidden');
+            errorIndicator.querySelector('p').innerText = err.message;
+        }
     }
 }
 
 /**
- * Tab Switching Logic
+ * Fetches dynamic banner carousels from the spreadsheet dashboard configuration
  */
+async function fetchLiveSlideshow() {
+    const slideshowContainer = document.getElementById('hero-bg-slideshow');
+    try {
+        const response = await fetch(SLIDESHOW_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        if (cleanRows.length <= 1) { if(slideshowContainer) slideshowContainer.style.backgroundColor = "#0f172a"; return; }
+        if (slideshowContainer) slideshowContainer.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i];
+            if (!row[0]) continue; 
+            if (slideshowContainer) {
+                slideshowContainer.innerHTML += `
+                    <div class="custom-slide fade">
+                        <img src="${row[0]}" alt="SK Documentation Slide">
+                    </div>
+                `;
+            }
+        }
+        slideTrackerIndex = 0;
+        runLiveSlideshow();
+    } catch (err) { console.error(err); }
+}
+
+let slideTrackerIndex = 0;
+function runLiveSlideshow() {
+    const slides = document.getElementsByClassName("custom-slide");
+    if (slides.length === 0) return;
+    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
+    slideTrackerIndex++;
+    if (slideTrackerIndex > slides.length) slideTrackerIndex = 1; 
+    slides[slideTrackerIndex - 1].style.display = "block";
+    setTimeout(runLiveSlideshow, 4500);
+}
+
+/**
+ * Pulls and renders the dynamic SK Council Directory profiles
+ */
+async function fetchLiveCouncil() {
+    const gridContainer = document.getElementById('council-grid');
+    const loadingIndicator = document.getElementById('council-loading-state');
+    try {
+        const response = await fetch(COUNCIL_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        if (cleanRows.length <= 1) { if(loadingIndicator) loadingIndicator.innerHTML = `<p style="font-size: 12px; color: #94a3b8;">No records posted.</p>`; return; }
+        if (gridContainer) gridContainer.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i];
+            if (row.length < 3 || !row[0]) continue; 
+            const role = row[0], name = row[1], purok = row[2] || 'Unassigned', contact = row[3] || 'No contact';
+            let cardClass = 'member-card';
+            if (role.toLowerCase().includes('chair') || role.toLowerCase().includes('kapitan')) cardClass = 'member-card chairperson-card';
+            else if (role.toLowerCase().includes('secretary') || role.toLowerCase().includes('treasurer')) cardClass = 'member-card executive-card';
+            if (gridContainer) {
+                gridContainer.innerHTML += `
+                    <div class="${cardClass}">
+                        <span class="member-role">${role}</span>
+                        <h3 class="member-name">${name}</h3>
+                        <span class="member-purok"><i class="fa-solid fa-location-dot"></i> ${purok}</span>
+                        <div class="member-contact"><i class="fa-solid fa-phone"></i> ${contact}</div>
+                    </div>
+                `;
+            }
+        }
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (gridContainer) gridContainer.classList.remove('hidden');
+    } catch (err) { console.error(err); }
+}
+
 function switchTab(targetTab) {
-    const feedbackForm = document.getElementById('feedback-form');
-    const contactForm = document.getElementById('contact-form');
-    const feedbackBtn = document.getElementById('tab-feedback-btn');
-    const contactBtn = document.getElementById('tab-contact-btn');
+    const feedbackForm = document.getElementById('feedback-form'), contactForm = document.getElementById('contact-form');
+    const feedbackBtn = document.getElementById('tab-feedback-btn'), contactBtn = document.getElementById('tab-contact-btn');
     const alertBox = document.getElementById('form-alert');
-
-    alertBox.classList.add('hidden');
-
+    if(alertBox) alertBox.classList.add('hidden');
     if (targetTab === 'feedback') {
-        feedbackForm.classList.remove('hidden');
-        contactForm.classList.add('hidden');
-        feedbackBtn.classList.add('active');
-        contactBtn.classList.remove('active');
+        if(feedbackForm) feedbackForm.classList.remove('hidden'); if(contactForm) contactForm.classList.add('hidden');
+        if(feedbackBtn) feedbackBtn.classList.add('active'); if(contactBtn) contactBtn.classList.remove('active');
     } else {
-        contactForm.classList.remove('hidden');
-        feedbackForm.classList.add('hidden');
-        contactBtn.classList.add('active');
-        feedbackBtn.classList.remove('active');
+        if(contactForm) contactForm.classList.remove('hidden'); if(feedbackForm) feedbackForm.classList.add('hidden');
+        if(contactBtn) contactBtn.className = 'active'; if(feedbackBtn) feedbackBtn.classList.remove('active');
     }
 }
 
-/**
- * Handle Form Submissions Pipeline and route submissions to Google Sheets
- */
 function setupFormListeners() {
-    const feedbackForm = document.getElementById('feedback-form');
-    const contactForm = document.getElementById('contact-form');
-    const alertBox = document.getElementById('form-alert');
-    const alertText = document.getElementById('alert-text');
-
-    feedbackForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const categorySelection = document.getElementById('feedback-category').value;
-        const suggestionText = document.getElementById('feedback-text').value;
-        const submitBtn = feedbackForm.querySelector('.submit-btn');
-
-        submitBtn.innerText = "Submitting...";
-        submitBtn.disabled = true;
-
-        const payload = {
-            category: categorySelection,
-            text: suggestionText
-        };
-
-        try {
-            await fetch(FEEDBACK_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            feedbackForm.classList.add('hidden');
-            alertBox.classList.remove('hidden');
-            alertText.innerText = `Mabuhay! Your anonymous suggestion regarding the selected program category has been safely recorded for council review.`;
-            feedbackForm.reset();
-
-        } catch (err) {
-            console.error("Form transmission anomaly:", err);
-            alertBox.classList.remove('hidden');
-            alertBox.className = "status-box error-box";
-            alertText.innerText = "Connection anomaly. Please try submitting your suggestion again.";
-        } finally {
-            submitBtn.innerText = "Submit Anonymously";
-            submitBtn.disabled = false;
-        }
-    });
-
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const clientName = document.getElementById('contact-name').value;
-        feedbackForm.classList.add('hidden');
-        contactForm.classList.add('hidden');
-        alertBox.classList.remove('hidden');
-        alertText.innerText = `Thank you ${clientName}! Your request has been logged. We will reach out shortly via your contact channels.`;
-        contactForm.reset();
-    });
+    const feedbackForm = document.getElementById('feedback-form'), contactForm = document.getElementById('contact-form');
+    const alertBox = document.getElementById('form-alert'), alertText = document.getElementById('alert-text');
+    if(feedbackForm) {
+        feedbackForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = feedbackForm.querySelector('.submit-btn');
+            submitBtn.innerText = "Submitting..."; submitBtn.disabled = true;
+            try {
+                await fetch(FEEDBACK_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: document.getElementById('feedback-category').value, text: document.getElementById('feedback-text').value }) });
+                feedbackForm.classList.add('hidden'); alertBox.classList.remove('hidden');
+                alertText.innerText = `Mabuhay! Your suggestion has been successfully recorded anonymously.`;
+                feedbackForm.reset();
+            } catch (err) { alertBox.classList.remove('hidden'); alertText.innerText = "Submission exception detected."; }
+            finally { submitBtn.innerText = "Submit Anonymously"; submitBtn.disabled = false; }
+        });
+    }
+    if(contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault(); const name = document.getElementById('contact-name').value;
+            if(feedbackForm) feedbackForm.classList.add('hidden'); contactForm.classList.add('hidden'); alertBox.classList.remove('hidden');
+            alertText.innerText = `Thank you ${name}! Your request has been logged.`; contactForm.reset();
+        });
+    }
 }
 
-/**
- * Automated FAQ Desk AI Knowledge Engine
- */
 function setupFAQEngine() {
-    const chatForm = document.getElementById('chat-input-area');
-    const userInput = document.getElementById('user-chat-input');
-    const chatContainer = document.getElementById('chat-messages');
-
-    function appendMessage(text, side) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `message ${side === 'user' ? 'user-message' : 'ai-message'}`;
-        msgDiv.innerText = text;
-        chatContainer.appendChild(msgDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight; 
-    }
-
-    function processAIResponse(query) {
-        const normalized = query.toLowerCase();
-        
-        if (normalized.includes('linggo') || normalized.includes('kabataan') || normalized.includes('sports') || normalized.includes('august')) {
-            return "📅 SK LINGGO NG KABATAAN 2026\n• Target Date: August 2026\n• Status: Planning Phase\n• Details: This annual youth celebration will focus on localized sports clinics, leadership development seminars, and team-building activities to foster unity among our community youth.";
-        }
-        if (normalized.includes('library') || normalized.includes('study') || normalized.includes('wi-fi') || normalized.includes('wifi') || normalized.includes('hub')) {
-            return "💻 BARANGAY YOUTH E-LIBRARY & STUDY HUB\n• Target Date: Ongoing Deployment\n• Status: In Progress\n• Details: We are setting up a dedicated, air-conditioned study hall inside the barangay hall premises. It will feature free high-speed Wi-Fi, computer access, and a quiet learning environment tailored for students.";
-        }
-        if (normalized.includes('waste') || normalized.includes('bin') || normalized.includes('recycle') || normalized.includes('trash') || normalized.includes('clean')) {
-            return "♻️ LOCALIZED WASTE SEGREGATION DRIVE\n• Target Date: Completed\n• Status: Fully Executed\n• Details: Color-coded recycling storage bins have been successfully distributed across the main puroks to encourage proper ecological disposal. Thank you for your cooperation!";
-        }
-        if (normalized.includes('project') || normalized.includes('list') || normalized.includes('happen') || normalized.includes('update') || normalized.includes('status') || normalized.includes('active')) {
-            return "📋 CURRENT PROJECT OVERVIEW:\n\n1. SK Linggo ng Kabataan 2026 (Planning Phase - Target: August 2026)\n2. Barangay Youth E-Library & Study Hub (In Progress - Ongoing Deployment)\n3. Localized Waste Segregation Drive (Completed & Deployed)\n\nYou can scroll down to the Live Project Pipeline grid to view full description logs or track live adjustments!";
-        }
-        if (normalized.includes('help') || normalized.includes('hi') || normalized.includes('hello') || normalized.includes('ask') || normalized.includes('question')) {
-            return "👋 Hello! I can instantly provide detailed parameters regarding our core programs:\n• Type 'library' for the Study Hub.\n• Type 'linggo' for the youth sports/seminar events.\n• Type 'waste' for the sanitation drives.\n• Type 'projects' to see a summary list of everything.\n\nIf you want to file a custom personal concern, just use the 'Message Us Personally' tab on the left!";
-        }
-        
-        return "I want to make sure you get the right info! I didn't find an exact keyword match for that phrase, but you can type 'projects' to see a full list of what we are tracking, or type 'help' to see my guide directory. You can also message our officers directly using the panel on the left!";
-    }
-
+    const chatForm = document.getElementById('chat-input-area'), userInput = document.getElementById('user-chat-input'), chatContainer = document.getElementById('chat-messages');
+    if(!chatForm) return;
     chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const rawText = userInput.value.trim();
-        if (!rawText) return;
-
-        appendMessage(rawText, 'user');
-        userInput.value = '';
-
+        e.preventDefault(); const rawText = userInput.value.trim(); if (!rawText) return;
+        const msg = document.createElement('div'); msg.className = 'message user-message'; msg.innerText = rawText; chatContainer.appendChild(msg); userInput.value = '';
         setTimeout(() => {
-            const botOutputText = processAIResponse(rawText);
-            appendMessage(botOutputText, 'ai');
+            const reply = document.createElement('div'); reply.className = 'message ai-message';
+            reply.innerText = "I am processing your query regarding our dynamic barangay community services. For immediate manual verification, please contact our desk officers directly!";
+            chatContainer.appendChild(reply); chatContainer.scrollTop = chatContainer.scrollHeight;
         }, 650);
     });
 }
 
-// Bind interactive event hooks securely into the global runtime stack loading phase
 window.addEventListener('DOMContentLoaded', () => {
-    fetchLiveAnnouncement();
     fetchLiveSlideshow(); 
     fetchLiveCouncil();
     fetchLiveProjects();
