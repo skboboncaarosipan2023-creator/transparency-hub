@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK Barangay Portal</title>
+    <!-- Google Fonts Framework Integration -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Link to our external stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HIGHEST PRIORITY STICKY ANNOUNCEMENT BAR -->
+    <div id="sticky-announcement" class="announcement-banner hidden">
+        <div class="announcement-content">
+            <span class="announcement-badge"><i class="fa-solid fa-bullhorn"></i> IMPORTANT</span>
+            <p id="announcement-text">Mabuhay! Registration for the upcoming Youth Capability Seminar is now ongoing. Please visit the Barangay Hall for more details.</p>
+        </div>
+    </div>
+
+    <!-- FULL-WIDTH EDGE-TO-EDGE IMMERSIVE BANNER -->
+    <header class="hero-banner immersive-hero">
+        <!-- Dynamic Background Slideshow Target Layer -->
+        <div id="hero-bg-slideshow" class="hero-bg-slideshow">
+            <!-- Image slides will inject here automatically from app.js -->
+        </div>
+        
+        <!-- Dark Overlay for High Readability -->
+        <div class="hero-overlay"></div>
+
+        <!-- Foreground Content Layer -->
+        <div class="hero-content-wrapper">
+            <div class="hero-content-layer">
+                <div class="hero-brand-area">
+                    <img src="Images/SK LOGO.jpg" alt="SK LOGO" class="sk-logo">
+                    <div class="hero-brand-titles">
+                        <h1>Sangguniang Kabataan</h1>
+                        <p>Barangay Bobon Caarosipan</p>
+                    </div>
+                </div>
+                <span class="transparency-badge">Official Transparency Hub</span>
+                <h2 class="hero-title">Our Plans Are Active.<br>Our Records Are Open.</h2>
+                <p class="hero-desc">
+                    Track all our programs, target timelines, and live execution records in real-time. We promise that we will do our best to make every single community project possible for the youth.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN DYNAMIC ADAPTIVE DASHBOARD ENGINE WRAPPER -->
+    <main class="dashboard-viewport-grid">
+        
+        <!-- ==========================================
+             LEFT PANEL: SK COUNCIL DIRECTORY
+             ========================================== -->
+        <section id="council" class="dashboard-panel side-column">
+            <div class="section-header council-header">
+                <h2>SK Council Directory</h2>
+                <p>Official youth leaders assigned to your specific area.</p>
+            </div>
+
+            <div id="council-loading-state" class="status-box loading-box">
+                <i class="fa-solid fa-circle-notch spinner"></i>
+                <p>Loading profiles...</p>
+            </div>
+
+            <div id="council-grid" class="council-grid hidden">
+                <!-- Injected via app.js -->
+            </div>
+        </section>
+
+        <!-- ==========================================
+             CENTER PANEL: STRATEGIC PLAN, PROJECTS, FEEDBACK FORMS
+             ========================================== -->
+        <div class="dashboard-panel center-column">
+            
+            <!-- SECTION 1: CBYDP PILLARS -->
+            <section id="plans" class="center-section-block">
+                <div class="section-header pillar-header">
+                    <h2>CBYDP Strategic Framework</h2>
+                    <p>The core target focus pillars of our active youth council.</p>
+                </div>
+                
+                <div class="pillars-grid">
+                    <div class="pillar-card">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <h3>Education & Skills</h3>
+                        <p>Providing localized review sessions, technology capability seminars, and leadership development frameworks.</p>
+                    </div>
+                    <div class="pillar-card">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                        <h3>Health & Sports</h3>
+                        <p>Grassroots sports tournaments, physical wellness distributions, and proactive localized anti-drug campaigns.</p>
+                    </div>
+                    <div class="pillar-card">
+                        <i class="fa-solid fa-seedling"></i>
+                        <h3>Environmental Action</h3>
+                        <p>Community-wide clean-up drives, plastic waste management systems, and climate accountability advocacies.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: LIVE PROJECT PIPELINE -->
+            <section id="projects" class="center-section-block">
+                <div class="section-header tracker-header">
+                    <h2>Live Project Pipeline</h2>
+                    <p>Pulled directly from our public project ledger files for real-time tracking.</p>
+                </div>
+
+                <div id="loading-state" class="status-box loading-box">
+                    <i class="fa-solid fa-circle-notch spinner"></i>
+                    <p>Reading repository ledger...</p>
+                </div>
+
+                <div id="error-state" class="status-box error-box hidden">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <p>Failed to fetch dynamic project profiles.</p>
+                </div>
+
+                <div id="project-grid" class="project-grid hidden">
+                    <!-- Injected via app.js -->
+                </div>
+            </section>
+
+            <!-- SECTION 3: INTERACTIVE VOICE & FEEDBACK FORMS -->
+            <section id="youth-voice" class="center-section-block">
+                <div class="section-header hub-header">
+                    <h2>Youth Voice Hub</h2>
+                    <p>Submit your thoughts, suggestions, or ask questions to our officials.</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="tab-header">
+                        <button id="tab-feedback-btn" class="tab-btn active" onclick="switchTab('feedback')">
+                            <i class="fa-solid fa-comments"></i> Feedback
+                        </button>
+                        <button id="tab-contact-btn" class="tab-btn" onclick="switchTab('contact')">
+                            <i class="fa-solid fa-envelope"></i> Message Us
+                        </button>
+                    </div>
+
+                    <form id="feedback-form" class="hub-form">
+                        <label for="feedback-category">Topic Category</label>
+                        <select id="feedback-category" required>
+                            <option value="" disabled selected>Select a topic...</option>
+                            <option value="education">Education & Skills Programs</option>
+                            <option value="sports">Health & Sports Tournaments</option>
+                            <option value="environment">Environmental Projects</option>
+                            <option value="general">General Suggestions / Other</option>
+                        </select>
+
+                        <label for="feedback-text">Your Thoughts</label>
+                        <textarea id="feedback-text" placeholder="Write suggestions here..." rows="4" required></textarea>
+
+                        <button type="submit" class="submit-btn">Submit Anonymously</button>
+                    </form>
+
+                    <!-- Form 2: Direct Contact (Personal Messaging) -->
+                            <form id="contact-form" class="hub-form hidden">
+                                <div class="official-email-badge" style="background: var(--brand-blue-light); padding: 0.6rem; border-radius: var(--radius-md); font-size: 0.725rem; color: var(--brand-blue); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <i class="fa-solid fa-envelope-open-text"></i>
+                                    <span>Direct Email: <a href="mailto:skboboncaarosipan@gmail.com" style="color: var(--brand-blue); font-weight: 700; text-decoration: underline;">skboboncaarosipan@gmail.com</a></span>
+                                </div>
+
+                                <label for="contact-name">Your Full Name</label>
+                                <input type="text" id="contact-name" placeholder="Juan Dela Cruz" required>
+
+                                <label for="contact-email">Your Email or Contact Number</label>
+                                <input type="text" id="contact-email" placeholder="0917xxxxxxx" required>
+
+                                <label for="contact-message">Your Message</label>
+                                <textarea id="contact-message" placeholder="Type your message to the council..." rows="3" required></textarea>
+
+                                <button type="submit" class="submit-btn contact-submit">Send Message</button>
+                            </form>
+
+                    <div id="form-alert" class="status-box success-box hidden">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <p id="alert-text"></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==========================================
+             RIGHT PANEL: FAQ AI INTERACTIVE CHAT DESK
+             ========================================== -->
+        <section id="ai-assistant" class="dashboard-panel side-column">
+            <div class="section-header ai-header">
+                <h2>SK AI Assistant</h2>
+                <p>Instant answers regarding our schedules, hubs, and programs.</p>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <i class="fa-solid fa-robot"></i>
+                        <div>
+                            <h4>SK Automated FAQ Desk</h4>
+                            <span class="status-indicator">● Online Support</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chat-messages" class="chat-messages">
+                    <div class="message ai-message">
+                        Mabuhay! Ask me basic questions about our programs or event schedules below!
+                    </div>
+                </div>
+
+                <form id="chat-input-area" class="chat-input-area">
+                    <input type="text" id="user-chat-input" placeholder="Type a keyword like 'library'..." autocomplete="off" required>
+                    <button type="submit" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+<!-- TRUE FULL-WIDTH STATIC BACKGROUND FOOTER BANNER -->
+    <footer class="footer-banner immersive-footer">
+        <!-- Static Background Layer -->
+        <div class="footer-bg-layer">
+            <img src="documentation/slide1.jpg" alt="SK Council Community Backdrop">
+        </div>
+        
+        <!-- Dark Protection Overlay Map -->
+        <div class="footer-overlay"></div>
+
+        <!-- Foreground Centered Content Layer -->
+        <div class="footer-content-wrapper">
+            <p class="footer-title">SANGGUNIANG KABATAAN DIARY ENGINE</p>
+            <p class="footer-desc">Administered via custom static frontend frameworks dynamically linked to secure cloud spreadsheet database ledgers.</p>
+        </div>
+    </footer>
+
+    <!-- Script Entry Link -->
+    <script src="app.js"></script>
+</body>
+</html>
