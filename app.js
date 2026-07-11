@@ -27,23 +27,20 @@ function parseCSV(text) {
 /**
  * Monitors the Sticky Announcement string values and hides the component framework if empty
  */
-function verifyAnnouncementVisibility() {
-    const announcementBar = document.getElementById('sticky-announcement');
-    const textContainer = document.getElementById('announcement-text');
-    
-    if (!announcementBar || !textContainer) return;
+function verifyAnnouncementVisibility(announcementText) {
+    const announcementBar = document.getElementById('announcement-bar');
+    const body = document.body;
 
-    const announcementContent = textContainer.innerText.trim();
-
-    if (announcementContent === "" || announcementContent === "N/A" || announcementContent.length < 3) {
-        announcementBar.classList.add('hidden');
-        document.body.style.paddingTop = "0px"; 
+    // Check if text is empty, just spaces, or explicitly set to N/A
+    if (!announcementText || announcementText.trim() === "" || announcementText.trim() === "N/A") {
+        announcementBar.style.display = 'none'; // Completely removes the element visually
+        body.style.paddingTop = '0px';          // Removes the layout spacing at the top
     } else {
-        announcementBar.classList.remove('hidden');
-        document.body.style.paddingTop = "45px"; 
+        announcementBar.style.display = 'block'; // Shows it if there is real text
+        announcementBar.innerText = announcementText;
+        body.style.paddingTop = '40px';         // Pushes the site down so it fits nicely
     }
 }
-
 /**
  * Fetches image configurations dynamically from the Google Sheet and builds the backdrop slides
  */
