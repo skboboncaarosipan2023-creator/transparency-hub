@@ -30,23 +30,23 @@ function parseCSV(text) {
  * Monitors the Sticky Announcement string values and hides the component framework if empty
  */
 function verifyAnnouncementVisibility(announcementText) {
-    const announcementBar = document.getElementById('announcement-bar');
-    const body = document.body;
+    const announcementBar = document.getElementById('sticky-announcement');
+    const announcementPara = document.getElementById('announcement-text');
 
     // Safety check: If the element isn't in index.html, exit quietly so the site never breaks!
     if (!announcementBar) {
-        console.warn("Warning: HTML element with ID 'announcement-bar' was not found.");
+        console.warn("Warning: HTML element with ID 'sticky-announcement' was not found.");
         return;
     }
 
     // Check if text is empty, just spaces, or explicitly set to N/A
     if (!announcementText || announcementText.trim() === "" || announcementText.trim() === "N/A") {
-        announcementBar.style.display = 'none'; // Completely removes the element visually
-        body.style.paddingTop = '0px';          // Removes the layout spacing at the top
+        announcementBar.classList.add('hidden'); // Uses your CSS hidden class to remove it visually
     } else {
-        announcementBar.style.display = 'block'; // Shows it if there is real text
-        announcementBar.innerText = announcementText;
-        body.style.paddingTop = '40px';         // Pushes the site down so it fits nicely
+        announcementBar.classList.remove('hidden'); // Shows it if there is real text
+        if (announcementPara) {
+            announcementPara.innerText = announcementText; // Replaces placeholder text with live sheet data
+        }
     }
 }
 
