@@ -47,7 +47,7 @@
     </header>
 
     <!-- MAIN DYNAMIC ADAPTIVE DASHBOARD ENGINE WRAPPER -->
-    <main class="dashboard-viewport-grid">
+    <main class="dashboard-viewport-grid" style="display: grid; grid-template-columns: 280px 1fr 340px; gap: 32px; max-width: 1600px; margin: -50px auto 60px auto; padding: 0 24px; position: relative; z-index: 10;">
         
         <!-- ==========================================
              LEFT PANEL: SK COUNCIL DIRECTORY (STATIC)
@@ -69,22 +69,17 @@
              ========================================== -->
         <div class="dashboard-panel center-column">
             
-            <!-- CENTRAL PORTAL MASTER SUB-NAVIGATION MENU HEADER -->
-            <div class="sub-nav-header-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm);">
-                <div style="font-weight: 800; font-size: 14px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; padding-left: 8px;">
-                    <i class="fa-solid fa-folder-open" style="color: #2563eb;"></i> Portal Sections:
+            <!-- CENTRAL PORTAL DROPDOWN SELECTOR SYSTEM -->
+            <div class="sub-nav-header-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: var(--shadow-sm);">
+                <div style="font-weight: 800; font-size: 14px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-layer-group" style="color: #2563eb;"></i> 
+                    <span>Select Portal View:</span>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button id="nav-home-btn" onclick="navigateCenterView('view-home', 'nav-home-btn')" style="border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #2563eb; color: #ffffff;">
-                        <i class="fa-solid fa-house"></i> Home Feed
-                    </button>
-                    <button id="nav-pipeline-btn" onclick="navigateCenterView('view-pipeline', 'nav-pipeline-btn')" style="border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #f1f5f9; color: #334155;">
-                        <i class="fa-solid fa-diagram-project"></i> Project Pipeline
-                    </button>
-                    <button id="nav-budget-btn" onclick="navigateCenterView('view-budget', 'nav-budget-btn')" style="border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #f1f5f9; color: #334155;">
-                        <i class="fa-solid fa-wallet"></i> Budget Allocation
-                    </button>
-                </div>
+                <select id="portal-view-selector" onchange="navigateCenterView(this.value, '')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-family: inherit; font-size: 13px; font-weight: 700; color: #334155; outline: none; cursor: pointer; width: 220px;">
+                    <option value="view-home">🏠 Home & Feed</option>
+                    <option value="view-pipeline">📊 Project Pipeline</option>
+                    <option value="view-budget">💼 Budget Allocation</option>
+                </select>
             </div>
 
             <!-- PAGE SECTION A: HOME ANNOUNCEMENTS AND FACEBOOK DOCUMENTATIONS FEED -->
@@ -170,7 +165,7 @@
         <!-- ==========================================
              RIGHT PANEL: YOUTH VOICE FEEDBACK HUB & AI CHAT DESK (STATIC)
              ========================================== -->
-        <div class="dashboard-panel side-column" style="background: transparent; border: none; box-shadow: none; overflow: visible;">
+        <div class="dashboard-panel side-column" style="display: flex; flex-direction: column; gap: 32px; background: transparent; border: none; box-shadow: none; overflow: visible;">
             
             <!-- SECTION 1: YOUTH VOICE FEEDBACK MODULE -->
             <section id="youth-voice" class="center-section-block" style="width: 100%;">
