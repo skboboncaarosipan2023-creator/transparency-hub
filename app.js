@@ -80,7 +80,7 @@ function processGeneralBulletin(bulletinText) {
 }
 
 /**
- * Fetches data from the separate Announcement tab
+ * Fetches data strictly from the separate Announcement tab
  */
 async function fetchLiveAnnouncements() {
     try {
@@ -89,11 +89,11 @@ async function fetchLiveAnnouncements() {
         const dataText = await response.text();
         const cleanRows = parseCSV(dataText);
 
+        // Row 1 is headers. Real announcement data is in Row 2 (index 1)
         if (cleanRows.length > 1) {
-            // Row 2 Column A (Emergency Message), Column B (Badge Type), Column C (General Bulletin)
-            const emergencyText = cleanRows[1][0] || "";
-            const badgeType = cleanRows[1][1] || "";
-            const generalText = cleanRows[1][2] || "";
+            const emergencyText = cleanRows[1][0] || ""; // Column A
+            const badgeType = cleanRows[1][1] || "";     // Column B
+            const generalText = cleanRows[1][2] || "";   // Column C
 
             processEmergencyAlert(emergencyText, badgeType);
             processGeneralBulletin(generalText);
@@ -131,7 +131,8 @@ async function fetchLiveProjects() {
         if (gridContainer) gridContainer.innerHTML = '';
 
         let projectCount = 0;
-        // Starts beautifully at row 2 (index 1) since the tab is completely pure!
+        
+        // FIXED: Loops through EVERY project row starting immediately at row 2 (index 1)
         for (let i = 1; i < cleanRows.length; i++) { 
             const row = cleanRows[i];
             if (!row || row.length < 3 || !row[0]) continue; 
