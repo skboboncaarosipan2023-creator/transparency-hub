@@ -46,8 +46,8 @@ function navigateCenterView(targetSectionId, activeBtnId) {
 }
 
 /**
- * UNLIMITED ALERTS & NOTICES ENGINE
- * Loops through the entire spreadsheet table without any count limits
+ * COLOR-CODED DYNAMIC INTENSITY ALERTS ENGINE
+ * Balances high-intensity and low-intensity notices beautifully
  */
 async function fetchLiveAnnouncements() {
     try {
@@ -65,11 +65,10 @@ async function fetchLiveAnnouncements() {
             return;
         }
 
-        // 1. PROCESS ALL ACTIVE EMERGENCY BANNER ALERTS (NO LIMIT)
+        // 1. PROCESS STACKED ANNOUNCEMENTS BY INTENSITY
         if (emergencyBar) {
-            // Clear out old static layout elements to build a dynamic dynamic vertical stacking area
             emergencyBar.innerHTML = ''; 
-            let hasActiveEmergency = false;
+            let hasActiveAlerts = false;
 
             for (let i = 1; i < cleanRows.length; i++) {
                 const row = cleanRows[i];
@@ -77,28 +76,41 @@ async function fetchLiveAnnouncements() {
                 
                 const alertText = row[0].trim();
                 if (alertText !== "" && alertText !== "N/A" && alertText.toLowerCase() !== "none") {
-                    hasActiveEmergency = true;
+                    hasActiveAlerts = true;
                     const badgeType = row[1] ? row[1].trim().toUpperCase() : "URGENT";
                     
-                    let iconMarkup = '<i class="fa-solid fa-triangle-exclamation"></i>';
-                    if (badgeType === 'NOTICE' || badgeType === 'INFO') iconMarkup = '<i class="fa-solid fa-circle-info"></i>';
-                    else if (badgeType === 'EMERGENCY') iconMarkup = '<i class="fa-solid fa-fire-flame-curved"></i>';
+                    // Setup style defaults based on serious intensity tiers
+                    let barBackground = '#ef4444'; // Extreme Danger Red
+                    let textColor = '#ffffff';
+                    let iconMarkup = '<i class="fa-solid fa-fire-flame-curved"></i>';
+                    let customStyleOverride = 'padding: 12px 24px; font-size: 14px; font-weight: 700;';
 
-                    // Append every single alert found row-by-row
+                    if (badgeType === 'URGENT') {
+                        barBackground = '#f97316'; // Warning Amber/Orange
+                        iconMarkup = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    } else if (badgeType === 'NOTICE') {
+                        barBackground = '#3b82f6'; // System Informational Blue
+                        iconMarkup = '<i class="fa-solid fa-circle-info"></i>';
+                        customStyleOverride = 'padding: 6px 24px; font-size: 12px; font-weight: 500; opacity: 0.95;';
+                    } else if (badgeType === 'INFO') {
+                        barBackground = '#10b981'; // Success/Safe Green
+                        iconMarkup = '<i class="fa-solid fa-bullhorn"></i>';
+                        customStyleOverride = 'padding: 6px 24px; font-size: 12px; font-weight: 500; opacity: 0.95;';
+                    }
+
                     emergencyBar.innerHTML += `
-                        <div class="announcement-content" style="display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; font-weight: 600; padding: 10px 24px; border-bottom: 1px solid rgba(255,255,255,0.15); width: 100%;">
-                            <span class="announcement-badge" style="background: rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px;">
+                        <div style="background: ${barBackground}; color: ${textColor}; display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); width: 100%; ${customStyleOverride}">
+                            <span style="background: rgba(255, 255, 255, 0.2); padding: 3px 8px; border-radius: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
                                 ${iconMarkup} ${badgeType}
                             </span>
-                            <p style="margin: 0; color: white;">${alertText}</p>
+                            <p style="margin: 0; line-height: 1.4; text-align: center;">${alertText}</p>
                         </div>
                     `;
                 }
             }
 
-            if (hasActiveEmergency) {
+            if (hasActiveAlerts) {
                 emergencyBar.style.setProperty('display', 'block', 'important');
-                // Dynamically offset body padding so the stacked banners don't block the website header content
                 document.body.style.paddingTop = `${emergencyBar.offsetHeight}px`;
             } else {
                 emergencyBar.style.setProperty('display', 'none', 'important');
@@ -106,7 +118,7 @@ async function fetchLiveAnnouncements() {
             }
         }
 
-        // 2. PROCESS ALL BULLETIN BOARD POSTINGS (NO LIMIT)
+        // 2. PROCESS BULLETIN BOARD POSTINGS
         if (bulletinContainer) {
             bulletinContainer.innerHTML = '';
             let bulletinCount = 0;
@@ -257,7 +269,7 @@ async function fetchLiveCouncil() {
         }
         if (loadingIndicator) loadingIndicator.classList.add('hidden');
         if (gridContainer) gridContainer.classList.remove('hidden');
-    } catch (err) catch (err) { console.error(err); }
+    } catch (err) { console.error(err); }
 }
 
 async function fetchLiveDocumentationFeed() {
