@@ -107,7 +107,8 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.35) contrast(1.05);
+    /* FIXED: Enhanced picture contrast and brightness filter parameters */
+    filter: brightness(0.55) contrast(1.02);
 }
 
 .hero-overlay {
@@ -116,7 +117,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, rgba(9,13,22,0.4), #090d16);
+    /* FIXED: Dropped opacity parameters down significantly to let the background pictures shine */
+    background: linear-gradient(to bottom, rgba(9, 13, 22, 0.15) 0%, rgba(9, 13, 22, 0.75) 100%);
     z-index: 2;
 }
 
@@ -124,6 +126,8 @@ body {
     position: relative;
     z-index: 3;
     max-width: 800px;
+    /* Added subtle text drop shadow protection block so text is perfectly readable on light pictures */
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .hero-brand-area {
@@ -150,7 +154,7 @@ body {
 
 .hero-brand-titles p {
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.85);
     font-weight: 500;
 }
 
@@ -165,6 +169,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 20px;
+    text-shadow: none; /* Prevent shadow bleed on badge */
 }
 
 .hero-title {
@@ -177,7 +182,7 @@ body {
 
 .hero-desc {
     font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.85);
     line-height: 1.6;
     font-weight: 400;
 }
@@ -615,7 +620,7 @@ body {
     background-color: var(--brand-blue-hover);
 }
 
-/* 🏢 IMMERSIVE FOOTER AREA CONFIGURATIONS */
+/* 🏢 IMMENSIVE FOOTER AREA CONFIGURATIONS */
 .immersive-footer {
     position: relative;
     width: 100%;
@@ -688,7 +693,7 @@ body {
 
 .loading-box i { color: var(--brand-blue); font-size: 20px; }
 .error-box { color: #ef4444; }
-.success-box { color: #16a34a; padding: 20px 0; }
+.status-box.success-box { color: #16a34a; padding: 20px 0; display: block; }
 
 .hidden { display: none !important; }
 
