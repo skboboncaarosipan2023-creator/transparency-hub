@@ -190,6 +190,7 @@ body {
 /* 🎛️ DYNAMIC DASHBOARD VIEWPORT GRID SYSTEM */
 .dashboard-viewport-grid {
     display: grid;
+    /* Default desktop layout grid */
     grid-template-columns: 280px 1fr 340px;
     gap: 32px;
     max-width: 1600px;
@@ -712,17 +713,35 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* 📱 RESPONSIVE SYSTEM MEDIA BREAKPOINTS BRIDGE */
-@media (max-width: 1200px) {
+/* 📱 RESPONSIVE SYSTEM MEDIA BREAKPOINTS BRIDGE & LINEAR PATCH */
+@media (max-width: 1250px) {
     .dashboard-viewport-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+        margin-top: 20px !important;
     }
+    
     .side-column {
-        max-width: 100%;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    .hero-content-wrapper {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    #hero-alerts-aside {
+        max-width: 100% !important;
+        width: 100% !important;
     }
 }
 
 @media (max-width: 768px) {
-    .hero-title { font-size: 2.2rem; }
-    .pillars-grid, .project-grid { grid-template-columns: 1fr; }
+    .hero-title { 
+        font-size: 2.2rem !important; 
+    }
+    .pillars-grid, .project-grid { 
+        grid-template-columns: 1fr !important; 
+    }
 }
