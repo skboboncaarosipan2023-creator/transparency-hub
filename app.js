@@ -38,7 +38,8 @@ function cleanDriveImageUrl(url) {
 }
 
 function navigateCenterView(targetSectionId, activeBtnId) {
-    const sections = ['view-home', 'view-pipeline', 'view-budget'];
+    // Fixed navigation array to include the dedicated documentation view
+    const sections = ['view-home', 'view-docs', 'view-pipeline', 'view-budget'];
     sections.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.setProperty('display', id === targetSectionId ? 'block' : 'none', 'important');
