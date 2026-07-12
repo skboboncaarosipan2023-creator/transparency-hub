@@ -16,12 +16,12 @@
 <body>
 
    <!-- EMERGENCY ANNOUNCEMENT BAR -->
-<div id="emergency-announcement" class="announcement-banner hidden" style="background: #ef4444; color: white;">
-    <div class="announcement-content">
-        <span class="announcement-badge"><i class="fa-solid fa-triangle-exclamation"></i> URGENT</span>
-        <p id="emergency-text"></p>
+    <div id="emergency-announcement" class="announcement-banner hidden" style="background: #ef4444; color: white;">
+        <div class="announcement-content">
+            <span class="announcement-badge"><i class="fa-solid fa-triangle-exclamation"></i> URGENT</span>
+            <p id="emergency-text"></p>
+        </div>
     </div>
-</div>
 
     <!-- FULL-WIDTH EDGE-TO-EDGE IMMERSIVE BANNER -->
     <header class="hero-banner immersive-hero">
@@ -74,7 +74,7 @@
             </div>
         </section>
 
-<!-- ==========================================
+        <!-- ==========================================
              CENTER PANEL: STRATEGIC PLAN, BULLETIN, PROJECTS, FEEDBACK FORMS
              ========================================== -->
         <div class="dashboard-panel center-column">
@@ -112,8 +112,7 @@
                     <p style="color: #bfdbfe; margin: 4px 0 0 0;">General updates and active announcements from the council.</p>
                 </div>
                 
-                <div class="form-container" style="border-top-left-radius: 0; border-top-right-radius: 0; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none;">
-                    <!-- Target element where app.js injects your row 3 spreadsheet message -->
+                <div class="form-container" style="border-top-left-radius: 0; border-top-right-radius: 0; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; box-shadow: var(--shadow-sm);">
                     <div id="general-bulletin-container">
                         <p style="font-size: 14px; color: #94a3b8; text-align: center;">
                             <i class="fa-solid fa-circle-notch spinner"></i> Loading latest announcements...
@@ -122,87 +121,6 @@
                 </div>
             </section>
 
-            <!-- SECTION 3: LIVE PROJECT PIPELINE -->
-            <section id="projects" class="center-section-block">
-                <div class="section-header tracker-header">
-                    <h2>Live Project Pipeline</h2>
-                    <p>Pulled directly from our public project ledger files for real-time tracking.</p>
-                </div>
-
-                <div id="loading-state" class="status-box loading-box">
-                    <i class="fa-solid fa-circle-notch spinner"></i>
-                    <p>Reading repository ledger...</p>
-                </div>
-
-                <div id="error-state" class="status-box error-box hidden">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <p>Failed to fetch dynamic project profiles.</p>
-                </div>
-
-                <div id="project-grid" class="project-grid hidden">
-                    <!-- Injected via app.js -->
-                </div>
-            </section>
-
-            <!-- SECTION 4: INTERACTIVE VOICE & FEEDBACK FORMS -->
-            <section id="youth-voice" class="center-section-block">
-                <div class="section-header hub-header">
-                    <h2>Youth Voice Hub</h2>
-                    <p>Submit your thoughts, suggestions, or ask questions to our officials.</p>
-                </div>
-
-                <div class="form-container">
-                    <div class="tab-header">
-                        <button id="tab-feedback-btn" class="tab-btn active" onclick="switchTab('feedback')">
-                            <i class="fa-solid fa-comments"></i> Feedback
-                        </button>
-                        <button id="tab-contact-btn" class="tab-btn" onclick="switchTab('contact')">
-                            <i class="fa-solid fa-envelope"></i> Message Us
-                        </button>
-                    </div>
-
-                    <form id="feedback-form" class="hub-form">
-                        <label for="feedback-category">Topic Category</label>
-                        <select id="feedback-category" required>
-                            <option value="" disabled selected>Select a topic...</option>
-                            <option value="education">Education & Skills Programs</option>
-                            <option value="sports">Health & Sports Tournaments</option>
-                            <option value="environment">Environmental Projects</option>
-                            <option value="general">General Suggestions / Other</option>
-                        </select>
-
-                        <label for="feedback-text">Your Thoughts</label>
-                        <textarea id="feedback-text" placeholder="Write suggestions here..." rows="4" required></textarea>
-
-                        <button type="submit" class="submit-btn">Submit Anonymously</button>
-                    </form>
-
-                    <!-- Form 2: Direct Contact (Personal Messaging) -->
-                    <form id="contact-form" class="hub-form hidden">
-                        <div class="official-email-badge" style="background: var(--brand-blue-light); padding: 0.6rem; border-radius: var(--radius-md); font-size: 0.725rem; color: var(--brand-blue); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                            <i class="fa-solid fa-envelope-open-text"></i>
-                            <span>Direct Email: <a href="mailto:skboboncaarosipan@gmail.com" style="color: var(--brand-blue); font-weight: 700; text-decoration: underline;">skboboncaarosipan@gmail.com</a></span>
-                        </div>
-
-                        <label for="contact-name">Your Full Name</label>
-                        <input type="text" id="contact-name" placeholder="Juan Dela Cruz" required>
-
-                        <label for="contact-email">Your Email or Contact Number</label>
-                        <input type="text" id="contact-email" placeholder="0917xxxxxxx" required>
-
-                        <label for="contact-message">Your Message</label>
-                        <textarea id="contact-message" placeholder="Type your message to the council..." rows="3" required></textarea>
-
-                        <button type="submit" class="submit-btn contact-submit">Send Message</button>
-                    </form>
-
-                    <div id="form-alert" class="status-box success-box hidden">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p id="alert-text"></p>
-                    </div>
-                </div>
-            </section>
-        </div>
             <!-- SECTION 3: LIVE PROJECT PIPELINE -->
             <section id="projects" class="center-section-block">
                 <div class="section-header tracker-header">
@@ -320,7 +238,7 @@
 
     </main>
 
-<!-- TRUE FULL-WIDTH STATIC BACKGROUND FOOTER BANNER -->
+    <!-- TRUE FULL-WIDTH STATIC BACKGROUND FOOTER BANNER -->
     <footer class="footer-banner immersive-footer">
         <!-- Static Background Layer -->
         <div class="footer-bg-layer">
