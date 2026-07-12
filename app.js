@@ -46,8 +46,7 @@ function navigateCenterView(targetSectionId, activeBtnId) {
 }
 
 /**
- * COLOR-CODED DYNAMIC INTENSITY ALERTS ENGINE
- * Balances high-intensity and low-intensity notices beautifully
+ * GLASSMORPHIC SPLIT ANNOUNCEMENTS PIPELINE
  */
 async function fetchLiveAnnouncements() {
     try {
@@ -58,6 +57,7 @@ async function fetchLiveAnnouncements() {
         
         const bulletinContainer = document.getElementById('general-bulletin-container');
         const emergencyBar = document.getElementById('emergency-announcement');
+        const heroAlertsAside = document.getElementById('hero-alerts-aside');
         
         if (cleanRows.length <= 1) {
             if (bulletinContainer) bulletinContainer.innerHTML = `<p style="font-size: 14px; color: #94a3b8; text-align: center;">No active announcements logged.</p>`;
@@ -65,57 +65,71 @@ async function fetchLiveAnnouncements() {
             return;
         }
 
-        // 1. PROCESS STACKED ANNOUNCEMENTS BY INTENSITY
-        if (emergencyBar) {
-            emergencyBar.innerHTML = ''; 
-            let hasActiveAlerts = false;
+        let hasTopEmergency = false;
+        if (emergencyBar) emergencyBar.innerHTML = '';
+        if (heroAlertsAside) heroAlertsAside.innerHTML = '';
 
-            for (let i = 1; i < cleanRows.length; i++) {
-                const row = cleanRows[i];
-                if (!row || !row[0]) continue;
-                
-                const alertText = row[0].trim();
-                if (alertText !== "" && alertText !== "N/A" && alertText.toLowerCase() !== "none") {
-                    hasActiveAlerts = true;
-                    const badgeType = row[1] ? row[1].trim().toUpperCase() : "URGENT";
-                    
-                    // Setup style defaults based on serious intensity tiers
-                    let barBackground = '#ef4444'; // Extreme Danger Red
-                    let textColor = '#ffffff';
-                    let iconMarkup = '<i class="fa-solid fa-fire-flame-curved"></i>';
-                    let customStyleOverride = 'padding: 12px 24px; font-size: 14px; font-weight: 700;';
+        // 1. EVALUATE COLUMN A ENTIRE LOG STREAM
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i];
+            if (!row || !row[0]) continue;
+            
+            const alertText = row[0].trim();
+            const badgeType = row[1] ? row[1].trim().toUpperCase() : "INFO";
+            
+            if (alertText === "" || alertText === "N/A" || alertText.toLowerCase() === "none") continue;
 
-                    if (badgeType === 'URGENT') {
-                        barBackground = '#f97316'; // Warning Amber/Orange
-                        iconMarkup = '<i class="fa-solid fa-triangle-exclamation"></i>';
-                    } else if (badgeType === 'NOTICE') {
-                        barBackground = '#3b82f6'; // System Informational Blue
-                        iconMarkup = '<i class="fa-solid fa-circle-info"></i>';
-                        customStyleOverride = 'padding: 6px 24px; font-size: 12px; font-weight: 500; opacity: 0.95;';
-                    } else if (badgeType === 'INFO') {
-                        barBackground = '#10b981'; // Success/Safe Green
-                        iconMarkup = '<i class="fa-solid fa-bullhorn"></i>';
-                        customStyleOverride = 'padding: 6px 24px; font-size: 12px; font-weight: 500; opacity: 0.95;';
-                    }
+            // TRACK CRITICAL EVENTS (ROUTED TO THE TOP BAR STACK)
+            if (badgeType === 'EMERGENCY') {
+                hasTopEmergency = true;
+                emergencyBar.innerHTML += `
+                    <div style="background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 24px; font-size: 14px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); width: 100%;">
+                        <span style="background: rgba(255, 255, 255, 0.25); padding: 3px 8px; border-radius: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-fire-flame-curved"></i> EMERGENCY
+                        </span>
+                        <p style="margin: 0; line-height: 1.4;">${alertText}</p>
+                    </div>
+                `;
+            } 
+            // TRACK SECONDARY EVENTS (ROUTED TO THE FROSTED GLASS SIDEBAR BAR CARD PANEL)
+            else if (heroAlertsAside) {
+                let glassBorderColor = 'rgba(255, 255, 255, 0.2)';
+                let labelBgColor = 'rgba(255, 255, 255, 0.15)';
+                let badgeTextColor = '#ffffff';
+                let alertIcon = '<i class="fa-solid fa-bullhorn"></i>';
 
-                    emergencyBar.innerHTML += `
-                        <div style="background: ${barBackground}; color: ${textColor}; display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); width: 100%; ${customStyleOverride}">
-                            <span style="background: rgba(255, 255, 255, 0.2); padding: 3px 8px; border-radius: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                ${iconMarkup} ${badgeType}
-                            </span>
-                            <p style="margin: 0; line-height: 1.4; text-align: center;">${alertText}</p>
-                        </div>
-                    `;
+                if (badgeType === 'URGENT') {
+                    glassBorderColor = 'rgba(249, 115, 22, 0.4)';
+                    labelBgColor = 'rgba(249, 115, 22, 0.2)';
+                    badgeTextColor = '#ffedd5';
+                    alertIcon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                } else if (badgeType === 'NOTICE') {
+                    glassBorderColor = 'rgba(59, 130, 246, 0.4)';
+                    labelBgColor = 'rgba(59, 130, 246, 0.2)';
+                    badgeTextColor = '#dbeafe';
+                    alertIcon = '<i class="fa-solid fa-circle-info"></i>';
                 }
-            }
 
-            if (hasActiveAlerts) {
-                emergencyBar.style.setProperty('display', 'block', 'important');
-                document.body.style.paddingTop = `${emergencyBar.offsetHeight}px`;
-            } else {
-                emergencyBar.style.setProperty('display', 'none', 'important');
-                document.body.style.paddingTop = '0px';
+                heroAlertsAside.innerHTML += `
+                    <div style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid ${glassBorderColor}; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); color: #ffffff; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center;">
+                            <span style="background: ${labelBgColor}; color: ${badgeTextColor}; padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+                                ${alertIcon} ${badgeType}
+                            </span>
+                        </div>
+                        <p style="margin: 0; font-size: 13px; line-height: 1.5; font-weight: 500; color: rgba(255, 255, 255, 0.95); text-shadow: 0 1px 2px rgba(0,0,0,0.3);">${alertText}</p>
+                    </div>
+                `;
             }
+        }
+
+        // CONTROL TOP STICKY BAR VISIBILITY ACTIONS
+        if (hasTopEmergency && emergencyBar) {
+            emergencyBar.style.setProperty('display', 'block', 'important');
+            document.body.style.paddingTop = `${emergencyBar.offsetHeight}px`;
+        } else if (emergencyBar) {
+            emergencyBar.style.setProperty('display', 'none', 'important');
+            document.body.style.paddingTop = '0px';
         }
 
         // 2. PROCESS BULLETIN BOARD POSTINGS
