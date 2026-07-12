@@ -1,5 +1,5 @@
 /**
- * SK Portal Database Controller Configuration
+ * SANGGUNIANG KABATAAN PORTAL - APP MODULE CONFIGURATION
  */
 const SHEET_ID = '1bkhpqGTzS1_NehWzCEfnpAy5gaz9NZldEIVq7gs04OM'; 
 const SHEET_TAB_NAME = 'Projects';
@@ -45,9 +45,6 @@ function navigateCenterView(targetSectionId, activeBtnId) {
     });
 }
 
-/**
- * GLASSMORPHIC SPLIT ANNOUNCEMENTS PIPELINE
- */
 async function fetchLiveAnnouncements() {
     try {
         const response = await fetch(ANNOUNCEMENT_DATA_URL);
@@ -278,7 +275,7 @@ async function fetchLiveCouncil() {
         }
         if (loadingIndicator) loadingIndicator.classList.add('hidden');
         if (gridContainer) gridContainer.classList.remove('hidden');
-    } catch (err) { console.error(err); }
+    } catch (err) catch (err) { console.error(err); }
 }
 
 async function fetchLiveDocumentationFeed() {
@@ -392,9 +389,6 @@ function setupFormListeners() {
     }
 }
 
-/**
- * 🤖 SMART SIMULATED REASONING CHAT ENGINE (PURE FRONTEND)
- */
 function setupFAQEngine() {
     const chatForm = document.getElementById('chat-input-area'), userInput = document.getElementById('user-chat-input'), chatContainer = document.getElementById('chat-messages');
     if(!chatForm) return;
@@ -404,7 +398,6 @@ function setupFAQEngine() {
         const userQuery = userInput.value.trim(); 
         if (!userQuery) return;
 
-        // 1. Render user message box
         const msg = document.createElement('div'); 
         msg.className = 'message user-message'; 
         msg.innerText = userQuery; 
@@ -412,20 +405,17 @@ function setupFAQEngine() {
         userInput.value = '';
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        // 2. Render localized thinking indicator card
         const reply = document.createElement('div'); 
         reply.className = 'message ai-message';
         reply.innerHTML = `<i class="fa-solid fa-circle-notch spinner"></i> Scanning spreadsheet database...`;
         chatContainer.appendChild(reply);
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        // Normalize text parameters
         const cleanInput = userQuery.toLowerCase().replace(/[?,.!]/g, '');
         const inputWords = cleanInput.split(/\s+/);
 
         setTimeout(async () => {
             try {
-                // Fetch live announcements and budget strings for local analysis
                 const [annRes, budgetRes] = await Promise.all([
                     fetch(ANNOUNCEMENT_DATA_URL),
                     fetch(BUDGET_DATA_URL)
@@ -438,13 +428,10 @@ function setupFAQEngine() {
 
                 let answer = "I couldn't find a specific program matching that query. Try typing terms like 'assistance', 'deadline', 'sports', or 'chairman'!";
 
-                // DYNAMIC FINANCIAL REASONING SIMULATION TIER
-                // Catches suggestions for shoes, clothing, or material gifts
                 if (cleanInput.includes('shoe') || cleanInput.includes('sapatos') || cleanInput.includes('cloth') || cleanInput.includes('uniform')) {
                     let presentationFund = "₱75,000.00";
                     let wellnessFund = "₱7,500.00";
 
-                    // Dynamically extract values from your real budget tab rows if they exist
                     if (budgetData.length > 1) {
                         const culturalRow = budgetData.find(r => r[0] && r[0].includes('Cultural Presentation'));
                         const wellnessRow = budgetData.find(r => r[0] && r[0].includes('Wellness'));
@@ -458,7 +445,6 @@ function setupFAQEngine() {
                     return;
                 }
 
-                // DIRECTORY TIER
                 if (cleanInput.includes('chair') || cleanInput.includes('leader') || cleanInput.includes('sino') || cleanInput.includes('sec') || cleanInput.includes('treas')) {
                     const res = await fetch(COUNCIL_DATA_URL);
                     if (res.ok) {
@@ -479,10 +465,8 @@ function setupFAQEngine() {
                     }
                 }
 
-                // ANNOUNCEMENT & FUZZY ELIGIBILITY APPLICATION TIER
                 if (annRes.ok) {
                     const cleanRows = parseCSV(await annRes.text());
-                    // Context evaluation: default fallback flag if eligibility phrases are used
                     const isLookingForQualifications = inputWords.some(w => ['qualified', 'eligible', 'pwede', 'qualify', 'apply', 'requirement', '16', '10', 'grade', 'years'].includes(w));
                     
                     for(let i = 1; i < cleanRows.length; i++) {
