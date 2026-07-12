@@ -25,7 +25,7 @@
         <div id="hero-bg-slideshow" class="hero-bg-slideshow"></div>
         <div class="hero-overlay"></div>
 
-        <!-- RE-ARRANGED HERO INTERIOR CANVAS: Split column design -->
+        <!-- HERO INTERIOR CANVAS: Split column design -->
         <div class="hero-content-wrapper" style="max-width: 1500px; width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; flex-wrap: wrap;">
             
             <!-- LEFT COLUMN: Main Branding Information Elements -->
@@ -52,7 +52,7 @@
         </div>
     </header>
 
-   <!-- MAIN DYNAMIC ADAPTIVE DASHBOARD ENGINE WRAPPER -->
+    <!-- MAIN DYNAMIC ADAPTIVE DASHBOARD ENGINE WRAPPER -->
     <main class="dashboard-viewport-grid">
         
         <!-- ==========================================
@@ -82,13 +82,14 @@
                     <span>Select Portal View:</span>
                 </div>
                 <select id="portal-view-selector" onchange="navigateCenterView(this.value, '')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-family: inherit; font-size: 13px; font-weight: 700; color: #334155; outline: none; cursor: pointer; width: 220px;">
-                    <option value="view-home">🏠 Home & Feed</option>
+                    <option value="view-home">🏠 Home & Bulletin</option>
+                    <option value="view-docs">📷 Photo Gallery</option>
                     <option value="view-pipeline">📊 Project Pipeline</option>
                     <option value="view-budget">💼 Budget Allocation</option>
                 </select>
             </div>
 
-            <!-- PAGE SECTION A: HOME ANNOUNCEMENTS AND FACEBOOK DOCUMENTATIONS FEED -->
+            <!-- PAGE SECTION A: HOME BULLETIN BOARD VIEW -->
             <div id="view-home">
                 <!-- Barangay Bulletin board block -->
                 <section id="bulletin" class="center-section-block" style="margin-bottom: 32px;">
@@ -103,19 +104,8 @@
                     </div>
                 </section>
 
-                <!-- Facebook Style Community Photo Documentations Stream Header -->
-                <div class="section-header" style="padding: 0; margin-bottom: 16px;">
-                    <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;"><i class="fa-solid fa-images" style="color:#2563eb;"></i> Council Activities & Documentations</h2>
-                    <p style="font-size: 13px; color: #64748b;">Live feed logs posted directly by our council team administrators.</p>
-                </div>
-
-                <!-- Targeted Dynamic Injection Area for Documentations -->
-                <div id="documentation-feed">
-                    <p style="text-align: center; font-size: 14px; color: #94a3b8;"><i class="fa-solid fa-circle-notch spinner"></i> Loading feed updates...</p>
-                </div>
-
-                <!-- CBYDP Strategic Framework Base pillars block placed cleanly under the feed stream -->
-                <section id="plans" class="center-section-block" style="margin-top: 16px;">
+                <!-- CBYDP Strategic Framework Base pillars block -->
+                <section id="plans" class="center-section-block">
                     <div class="section-header pillar-header">
                         <h2>CBYDP Strategic Framework</h2>
                         <p>The core target focus pillars of our active youth council.</p>
@@ -140,7 +130,19 @@
                 </section>
             </div>
 
-            <!-- PAGE SECTION B: LIVE PROJECTS PIPELINE CORRIDOR -->
+            <!-- PAGE SECTION B: SEPARATE DEDICATED PHOTO DOCUMENTATION FEED -->
+            <div id="view-docs" style="display: none;">
+                <div class="section-header" style="padding: 0; margin-bottom: 20px;">
+                    <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a;"><i class="fa-solid fa-images" style="color:#2563eb;"></i> Council Activities & Documentations</h2>
+                    <p style="font-size: 13px; color: #64748b;">Facebook-style event streams logged directly by our administrators.</p>
+                </div>
+                <!-- Targeted Dynamic Injection Area for Documentations -->
+                <div id="documentation-feed">
+                    <p style="text-align: center; font-size: 14px; color: #94a3b8;"><i class="fa-solid fa-circle-notch spinner"></i> Loading feed updates...</p>
+                </div>
+            </div>
+
+            <!-- PAGE SECTION C: LIVE PROJECTS PIPELINE CORRIDOR -->
             <div id="view-pipeline" style="display: none;">
                 <section id="projects" class="center-section-block">
                     <div class="section-header tracker-header">
@@ -155,7 +157,7 @@
                 </section>
             </div>
 
-            <!-- PAGE SECTION C: TRANSPARENT VALUE BUDGET allocation LEDGERS -->
+            <!-- PAGE SECTION D: TRANSPARENT VALUE BUDGET ALLOCATION LEDGERS -->
             <div id="view-budget" style="display: none;">
                 <section id="budget" class="center-section-block">
                     <div class="section-header tracker-header" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 24px;">
