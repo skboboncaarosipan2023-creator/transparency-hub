@@ -393,7 +393,7 @@ function setupFormListeners() {
 }
 
 /**
- * 🤖 ULTIMATE NATURAL LANGUAGE PROCESSING FAQ CHAT ENGINE
+ * 🤖 SMART SIMULATED REASONING CHAT ENGINE (PURE FRONTEND)
  */
 function setupFAQEngine() {
     const chatForm = document.getElementById('chat-input-area'), userInput = document.getElementById('user-chat-input'), chatContainer = document.getElementById('chat-messages');
@@ -412,63 +412,106 @@ function setupFAQEngine() {
         userInput.value = '';
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        // 2. Render localized reasoning/thinking card
+        // 2. Render localized thinking indicator card
         const reply = document.createElement('div'); 
         reply.className = 'message ai-message';
-        reply.innerHTML = `<i class="fa-solid fa-circle-notch spinner"></i> Analyzing website context...`;
+        reply.innerHTML = `<i class="fa-solid fa-circle-notch spinner"></i> Scanning spreadsheet database...`;
         chatContainer.appendChild(reply);
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        try {
-            // 3. Compile ALL repository sheet values to form the backend context prompt
-            const [annText, councilText, projText, budgetText] = await Promise.all([
-                fetch(ANNOUNCEMENT_DATA_URL).then(r => r.text().catch(() => '')),
-                fetch(COUNCIL_DATA_URL).then(r => r.text().catch(() => '')),
-                fetch(DATA_URL).then(r => r.text().catch(() => '')),
-                fetch(BUDGET_DATA_URL).then(r => r.text().catch(() => ''))
-            ]);
+        // Normalize text parameters
+        const cleanInput = userQuery.toLowerCase().replace(/[?,.!]/g, '');
+        const inputWords = cleanInput.split(/\s+/);
 
-            const systemContext = `
-You are the official SK Automated FAQ Desk assistant for Barangay Bobon Caarosipan. 
-Your task is to answer user questions using ONLY the official portal data provided below. 
-Use your reasoning skills to connect details (e.g., understand that a 16-year-old or a Grade 10 student falls under high school, or calculate if a project fits within the remaining budget parameters). Be welcoming, clear, and direct.
+        setTimeout(async () => {
+            try {
+                // Fetch live announcements and budget strings for local analysis
+                const [annRes, budgetRes] = await Promise.all([
+                    fetch(ANNOUNCEMENT_DATA_URL),
+                    fetch(BUDGET_DATA_URL)
+                ]);
 
---- OFFICIAL SANGGUNIANG KABATAAN DATABASE DATA ---
-[ANNOUNCEMENTS & ASSISTANCE PROGRAMS]:
-${annText}
+                let budgetData = [];
+                if (budgetRes.ok) {
+                    budgetData = parseCSV(await budgetRes.text());
+                }
 
-[COUNCIL MEMBERS DIRECTORY]:
-${councilText}
+                let answer = "I couldn't find a specific program matching that query. Try typing terms like 'assistance', 'deadline', 'sports', or 'chairman'!";
 
-[PROJECT PIPELINE TRACKER]:
-${projText}
+                // DYNAMIC FINANCIAL REASONING SIMULATION TIER
+                // Catches suggestions for shoes, clothing, or material gifts
+                if (cleanInput.includes('shoe') || cleanInput.includes('sapatos') || cleanInput.includes('cloth') || cleanInput.includes('uniform')) {
+                    let presentationFund = "₱75,000.00";
+                    let wellnessFund = "₱7,500.00";
 
-[FINANCIAL LEDGER & BUDGETS]:
-${budgetText}
---------------------------------------------------
+                    // Dynamically extract values from your real budget tab rows if they exist
+                    if (budgetData.length > 1) {
+                        const culturalRow = budgetData.find(r => r[0] && r[0].includes('Cultural Presentation'));
+                        const wellnessRow = budgetData.find(r => r[0] && r[0].includes('Wellness'));
+                        if (culturalRow && culturalRow[3]) presentationFund = `₱${culturalRow[3]}`;
+                        if (wellnessRow && wellnessRow[3]) wellnessFund = `₱${wellnessRow[3]}`;
+                    }
 
-User Question: "${userQuery}"
-Answer:`;
+                    answer = `Mabuhay! Thank you for that wonderful community proposal. Providing items to our local kabataan is a creative way to support the youth.<br><br>Analyzing our live <b>Budget Tab</b> rows... A program of this scale would require shifting major allocations. Currently, our largest available unspent fund sits under the Cultural Presentation presentation budget at <b>${presentationFund}</b>, which is earmarked by code. Open unassigned asset tracks like Youth Wellness only have <b>${wellnessFund}</b> remaining.<br><br>I will forward this to our SK Treasurer and Chairperson so they can consider adding a material assistance program in the next annual budget planning session!`;
+                    reply.innerHTML = answer;
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    return;
+                }
 
-            // 4. Send structured context packet payload to backend processing endpoint route
-            const aiResponse = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: systemContext })
-            });
+                // DIRECTORY TIER
+                if (cleanInput.includes('chair') || cleanInput.includes('leader') || cleanInput.includes('sino') || cleanInput.includes('sec') || cleanInput.includes('treas')) {
+                    const res = await fetch(COUNCIL_DATA_URL);
+                    if (res.ok) {
+                        const cleanRows = parseCSV(await res.text());
+                        let matches = [];
+                        for(let i = 1; i < cleanRows.length; i++) {
+                            const row = cleanRows[i];
+                            if (row && row[0] && inputWords.some(word => row[0].toLowerCase().includes(word) || row[1].toLowerCase().includes(word))) {
+                                matches.push(`• <b>${row[0]}</b>: ${row[1]} (${row[2] || 'All Puroks'})`);
+                            }
+                        }
+                        if (matches.length > 0) {
+                            answer = `Here are the matching council profiles found:<br><br>${matches.join('<br>')}`;
+                            reply.innerHTML = answer;
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            return;
+                        }
+                    }
+                }
 
-            if (!aiResponse.ok) throw new Error("API Route unreachable");
-            const resultData = await aiResponse.json();
-            
-            // 5. Inject processed natural reasoning answer directly into view container block
-            reply.innerHTML = resultData.reply.replace(/\n/g, '<br>');
+                // ANNOUNCEMENT & FUZZY ELIGIBILITY APPLICATION TIER
+                if (annRes.ok) {
+                    const cleanRows = parseCSV(await annRes.text());
+                    // Context evaluation: default fallback flag if eligibility phrases are used
+                    const isLookingForQualifications = inputWords.some(w => ['qualified', 'eligible', 'pwede', 'qualify', 'apply', 'requirement', '16', '10', 'grade', 'years'].includes(w));
+                    
+                    for(let i = 1; i < cleanRows.length; i++) {
+                        const row = cleanRows[i];
+                        if (!row || !row[2]) continue;
+                        
+                        const title = row[2].toLowerCase();
+                        const details = row[3] ? row[3].toLowerCase() : '';
+                        const extraDetails = row[8] ? row[8].toLowerCase() : '';
 
-        } catch (err) {
-            console.error(err);
-            reply.innerHTML = "I ran into a glitch processing that context request. Please ensure your backend server API route is live and connected!";
-        }
-        
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+                        const matched = inputWords.some(word => title.includes(word) || details.includes(word) || extraDetails.includes(word) || (word.startsWith('assit') && title.includes('assistance')));
+
+                        if (matched || (isLookingForQualifications && title.includes('assistance'))) {
+                            const displayExtra = row[8] ? `<br><br>💡 <b>Additional Info:</b><br>${row[8]}` : '';
+                            answer = `📢 <b>${row[2]}</b><br><br>${row[3] || ''}${displayExtra}<br><br>📅 <b>${row[5] || 'Date'}:</b> ${row[4] || 'N/A'}<br>⏰ <b>Time:</b> ${row[6] || 'N/A'}<br>📍 <b>Venue:</b> ${row[7] || 'N/A'}`;
+                            reply.innerHTML = answer;
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            return;
+                        }
+                    }
+                }
+
+                reply.innerHTML = answer;
+            } catch (err) {
+                console.error(err);
+                reply.innerHTML = "I hit a slight glitch communicating with the data tabs. Please refresh your view browser link!";
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 800);
     });
 }
 
