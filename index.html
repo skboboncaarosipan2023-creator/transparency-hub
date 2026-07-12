@@ -15,21 +15,21 @@
 </head>
 <body>
 
-   <!-- EMERGENCY ANNOUNCEMENT BAR (FIXED STICKY CONFIGURATION) -->
+   <!-- EMERGENCY ANNOUNCEMENT BAR (RESERVED EXCLUSIVELY FOR HIGH CRISIS EMERGENCY TIER) -->
     <div id="emergency-announcement" class="announcement-banner" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; display: none; background: #ef4444; color: white;">
-        <div class="announcement-content">
-            <span class="announcement-badge"><i class="fa-solid fa-triangle-exclamation"></i> URGENT</span>
-            <p id="emergency-text"></p>
-        </div>
+        <!-- Injected via app.js -->
     </div>
 
     <!-- FULL-WIDTH EDGE-TO-EDGE IMMERSIVE BANNER -->
-    <header class="hero-banner immersive-hero" style="margin-top: 0;">
+    <header class="hero-banner immersive-hero" style="margin-top: 0; min-height: 65vh; padding: 100px 4% 80px 4%;">
         <div id="hero-bg-slideshow" class="hero-bg-slideshow"></div>
         <div class="hero-overlay"></div>
 
-        <div class="hero-content-wrapper">
-            <div class="hero-content-layer">
+        <!-- RE-ARRANGED HERO INTERIOR CANVAS: Split column design -->
+        <div class="hero-content-wrapper" style="max-width: 1500px; width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; flex-wrap: wrap;">
+            
+            <!-- LEFT COLUMN: Main Branding Information Elements -->
+            <div class="hero-content-layer" style="flex: 1; min-width: 320px; max-width: 750px;">
                 <div class="hero-brand-area">
                     <img src="Images/SK LOGO.jpg" alt="SK LOGO" class="sk-logo">
                     <div class="hero-brand-titles">
@@ -43,6 +43,12 @@
                     Track all our programs, target timelines, and live execution records in real-time. We promise that we will do our best to make every single community project possible for the youth.
                 </p>
             </div>
+
+            <!-- RIGHT COLUMN: Elegant Translucent Frosted Glass Secondary Alerts Container -->
+            <div id="hero-alerts-aside" style="flex: 1; min-width: 320px; max-width: 450px; display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+                <!-- Secondary alerts (URGENT, NOTICE, INFO) load here seamlessly via app.js -->
+            </div>
+            
         </div>
     </header>
 
@@ -90,7 +96,6 @@
                         <h2 style="color: white; margin: 0;"><i class="fa-solid fa-bullhorn"></i> Barangay Bulletin Board</h2>
                         <p style="color: #bfdbfe; margin: 4px 0 0 0;">General updates and active announcements from the council.</p>
                     </div>
-                    <!-- Added a cleaner look for housing multiple announcements scrollably -->
                     <div class="form-container" style="border-top-left-radius: 0; border-top-right-radius: 0; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; box-shadow: var(--shadow-sm);">
                         <div id="general-bulletin-container" style="display: flex; flex-direction: column; gap: 24px;">
                             <p style="text-align: center; font-size: 14px; color: #94a3b8;"><i class="fa-solid fa-circle-notch spinner"></i> Fetching active board notices...</p>
