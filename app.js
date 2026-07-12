@@ -30,6 +30,24 @@ function parseCSV(text) {
 }
 
 /**
+ * AUTOMATIC LINK CONVERTER
+ * Converts messy standard Google Drive links into raw direct-embed image streams instantly
+ */
+function cleanDriveImageUrl(url) {
+    if (!url) return '';
+    
+    // Check if the URL is a standard Google Drive file link
+    if (url.includes('drive.google.com')) {
+        // Regular expressions to extract the long character ID from the URL structure
+        const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+            return `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+    }
+    return url; // Return unchanged if it's already a direct link or alternative hosting hosting domain
+}
+
+/**
  * Controls the top-level high-priority Emergency Banner layout
  */
 function processEmergencyAlert(alertText, badgeType) {
@@ -203,13 +221,18 @@ async function fetchLiveSlideshow() {
         const cleanRows = parseCSV(dataText);
         if (cleanRows.length <= 1) { if(slideshowContainer) slideshowContainer.style.backgroundColor = "#0f172a"; return; }
         if (slideshowContainer) slideshowContainer.innerHTML = '';
+        
         for (let i = 1; i < cleanRows.length; i++) {
             const row = cleanRows[i];
             if (!row[0]) continue; 
+            
+            // FIXED: Automatically translates standard copy-pasted sharing links into raw imagery streams
+            const optimizedLink = cleanDriveImageUrl(row[0]);
+            
             if (slideshowContainer) {
                 slideshowContainer.innerHTML += `
                     <div class="custom-slide fade">
-                        <img src="${row[0]}" alt="SK Documentation Slide">
+                        <img src="${optimizedLink}" alt="SK Documentation Slide">
                     </div>
                 `;
             }
@@ -282,7 +305,6 @@ function switchTab(targetTab) {
         if (feedbackForm) feedbackForm.style.setProperty('display', 'block', 'important');
         if (contactForm) contactForm.style.setProperty('display', 'none', 'important');
         
-        // Force visual states without clearing layout metadata configurations
         if (feedbackBtn) { feedbackBtn.style.background = "var(--brand-blue, #2563eb)"; feedbackBtn.style.color = "#ffffff"; }
         if (contactBtn) { contactBtn.style.background = "transparent"; contactBtn.style.color = "var(--text-muted, #64748b)"; }
     } else {
