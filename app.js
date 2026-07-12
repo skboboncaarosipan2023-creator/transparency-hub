@@ -295,28 +295,44 @@ async function fetchLiveDocumentationFeed() {
         if (!response.ok) return;
         const dataText = await response.text();
         const cleanRows = parseCSV(dataText);
+        
         if (cleanRows.length <= 1) {
             feedContainer.innerHTML = `<p style="font-size: 14px; color: #94a3b8; text-align: center; padding: 20px;">No community documentation posts logged yet.</p>`;
             return;
         }
+        
         feedContainer.innerHTML = '';
         for (let i = 1; i < cleanRows.length; i++) {
-            const row = cleanRows[i]; if (!row || !row[0]) continue;
-            const rawImg = cleanDriveImageUrl(row[0]), caption = row[1] || '', dateStr = row[2] || 'Recent';
+            const row = cleanRows[i]; 
+            if (!row || (!row[0] && !row[1])) continue; // Skip truly empty lines safely
+            
+            // If the URL cell is blank or placeholder text, use a fallback local image framework or layout block
+            const rawImg = (row[0] && !row[0].includes('[Paste')) ? cleanDriveImageUrl(row[0]) : '';
+            const caption = row[1] || 'No caption provided.';
+            const dateStr = row[2] || 'Recent Update';
+            
             feedContainer.innerHTML += `
-                <div class="fb-post-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div class="fb-post-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm); width: 100%;">
                     <div style="display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid #f1f5f9;">
                         <img src="Images/SK LOGO.jpg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                        <div><h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0;">Sangguniang Kabataan</h4><span style="font-size: 11px; color: #94a3b8; display: block;"><i class="fa-solid fa-earth-asia"></i> ${dateStr}</span></div>
+                        <div>
+                            <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0;">Sangguniang Kabataan</h4>
+                            <span style="font-size: 11px; color: #94a3b8; display: block;"><i class="fa-solid fa-earth-asia"></i> ${dateStr}</span>
+                        </div>
                     </div>
                     <div style="padding: 16px; font-size: 14px; color: #334155; line-height: 1.6;">${caption}</div>
-                    <div style="width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center;"><img src="${rawImg}" style="width: 100%; max-height: 450px; object-fit: cover;"></div>
+                    ${rawImg ? `
+                    <div style="width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-top: 1px solid #f1f5f9;">
+                        <img src="${rawImg}" style="width: 100%; max-height: 500px; object-fit: cover;">
+                    </div>` : ''}
                 </div>
             `;
         }
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+        console.error(err); 
+        feedContainer.innerHTML = `<p style="text-align: center; font-size: 14px; color: #ef4444;">Failed to load documentation logs.</p>`;
+    }
 }
-
 async function fetchLiveBudgetLedger() {
     const budgetGrid = document.getElementById('budget-ledger-grid');
     if (!budgetGrid) return;
