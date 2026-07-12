@@ -15,8 +15,8 @@
 </head>
 <body>
 
-   <!-- EMERGENCY ANNOUNCEMENT BAR -->
-    <div id="emergency-announcement" class="announcement-banner" style="background: #ef4444; color: white;">
+   <!-- EMERGENCY ANNOUNCEMENT BAR (FIXED STICKY CONFIGURATION) -->
+    <div id="emergency-announcement" class="announcement-banner" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; display: none; background: #ef4444; color: white;">
         <div class="announcement-content">
             <span class="announcement-badge"><i class="fa-solid fa-triangle-exclamation"></i> URGENT</span>
             <p id="emergency-text"></p>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- FULL-WIDTH EDGE-TO-EDGE IMMERSIVE BANNER -->
-    <header class="hero-banner immersive-hero">
+    <header class="hero-banner immersive-hero" style="margin-top: 0;">
         <div id="hero-bg-slideshow" class="hero-bg-slideshow"></div>
         <div class="hero-overlay"></div>
 
@@ -90,8 +90,11 @@
                         <h2 style="color: white; margin: 0;"><i class="fa-solid fa-bullhorn"></i> Barangay Bulletin Board</h2>
                         <p style="color: #bfdbfe; margin: 4px 0 0 0;">General updates and active announcements from the council.</p>
                     </div>
+                    <!-- Added a cleaner look for housing multiple announcements scrollably -->
                     <div class="form-container" style="border-top-left-radius: 0; border-top-right-radius: 0; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; box-shadow: var(--shadow-sm);">
-                        <div id="general-bulletin-container"></div>
+                        <div id="general-bulletin-container" style="display: flex; flex-direction: column; gap: 24px;">
+                            <p style="text-align: center; font-size: 14px; color: #94a3b8;"><i class="fa-solid fa-circle-notch spinner"></i> Fetching active board notices...</p>
+                        </div>
                     </div>
                 </section>
 
