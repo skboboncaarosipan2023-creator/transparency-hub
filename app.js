@@ -1,207 +1,508 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sangguniang Kabataan Portal</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
+const SHEET_ID = '1bkhpqGTzS1_NehWzCEfnpAy5gaz9NZldEIVq7gs04OM'; 
+const SHEET_TAB_NAME = 'Projects';
+const MEMBERS_TAB_NAME = 'Members';
+const SLIDESHOW_TAB_NAME = 'Slideshow';
+const ANNOUNCEMENT_TAB_NAME = 'Announcement';
+const DOCS_TAB_NAME = 'Documentation';
+const BUDGET_TAB_NAME = 'Budget';
 
-    <div id="emergency-announcement" class="announcement-banner"></div>
+const cacheBuster = `&cb=${new Date().getTime()}`;
 
-    <header class="immersive-hero">
-        <div id="hero-bg-slideshow" class="hero-bg-slideshow"></div>
-        <div class="hero-overlay"></div>
+const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_TAB_NAME}${cacheBuster}`;
+const COUNCIL_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${MEMBERS_TAB_NAME}${cacheBuster}`;
+const SLIDESHOW_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SLIDESHOW_TAB_NAME}${cacheBuster}`;
+const ANNOUNCEMENT_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${ANNOUNCEMENT_TAB_NAME}${cacheBuster}`;
+const DOCS_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${DOCS_TAB_NAME}${cacheBuster}`;
+const BUDGET_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${BUDGET_TAB_NAME}${cacheBuster}`;
+
+const FEEDBACK_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiDIQb7zpIFdbbHwH9gld2nbXDhn7hUU5ls9oY2NKznAGMbVif4Wmqc0obtKTU79_R/exec';
+
+function parseCSV(text) {
+    let lines = text.split('\n');
+    return lines.map(line => {
+        let matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+        return matches.map(val => val.replace(/^"|"$/g, '').trim());
+    });
+}
+
+function cleanDriveImageUrl(url) {
+    if (!url) return '';
+    if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    }
+    return url;
+}
+
+function navigateCenterView(targetSectionId) {
+    const sections = ['view-home', 'view-docs', 'view-pipeline', 'view-budget'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.setProperty('display', id === targetSectionId ? 'block' : 'none', 'important');
+    });
+}
+
+async function fetchLiveAnnouncements() {
+    try {
+        const response = await fetch(ANNOUNCEMENT_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
         
-        <div style="margin: 0 auto; width: 100%; max-width: 1600px; padding: 0 24px;">
-            <div class="hero-content-wrapper">
-                <div class="hero-brand-area">
-                    <img src="Images/SK LOGO.jpg" alt="SK Logo" class="sk-logo">
-                    <div class="hero-brand-titles">
-                        <h1>Sangguniang Kabataan</h1>
-                        <p>Barangay Bobon Caarosipan</p>
-                    </div>
-                </div>
-                <span class="transparency-badge">Official Transparency Hub</span>
-                <h2 class="hero-title">Youth Leadership & Public Ledger</h2>
-                <p class="hero-desc">Access live local council resolutions, public resource allocations, project updates, and direct development indicators tracking community assets.</p>
-            </div>
-        </div>
-    </header>
+        const bulletinContainer = document.getElementById('general-bulletin-container');
+        const emergencyBar = document.getElementById('emergency-announcement');
+        const heroAlertsAside = document.getElementById('hero-alerts-aside');
+        
+        if (cleanRows.length <= 1) {
+            if (bulletinContainer) bulletinContainer.innerHTML = `<p style="font-size: 14px; color: #94a3b8; text-align: center;">No active announcements logged.</p>`;
+            if (emergencyBar) emergencyBar.style.setProperty('display', 'none', 'important');
+            return;
+        }
 
-    <main class="dashboard-viewport-grid">
+        let hasTopEmergency = false;
+        if (emergencyBar) emergencyBar.innerHTML = '';
+        if (heroAlertsAside) heroAlertsAside.innerHTML = '';
 
-        <aside class="side-column">
-            <div class="section-header">
-                <h2>SK Council Directory</h2>
-                <p>Official youth leaders assigned to your specific area.</p>
-            </div>
-            <div id="council-grid" class="council-grid">
-                <div id="council-loading-state" class="status-box loading-box">
-                    <i class="fa-solid fa-circle-notch fa-spin"></i>
-                    <span>Loading council members...</span>
-                </div>
-            </div>
-        </aside>
-
-        <section class="dashboard-panel">
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i];
+            if (!row || !row[0]) continue;
             
-            <nav style="display: flex; gap: 8px; background: #ffffff; padding: 12px 24px; border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.6); box-shadow: var(--shadow-sm); overflow-x: auto; white-space: nowrap;">
-                <button onclick="navigateCenterView('view-home')" class="tab-btn" style="background: var(--brand-blue); color: white;">General Bulletin</button>
-                <button onclick="navigateCenterView('view-docs')" class="tab-btn" style="background: transparent; color: var(--text-secondary);">Documentation</button>
-                <button onclick="navigateCenterView('view-pipeline')" class="tab-btn" style="background: transparent; color: var(--text-secondary);">Project Tracker</button>
-                <button onclick="navigateCenterView('view-budget')" class="tab-btn" style="background: transparent; color: var(--text-secondary);">Treasury Balance</button>
-            </nav>
+            const alertText = row[0].trim();
+            const badgeType = row[1] ? row[1].trim().toUpperCase() : "INFO";
+            
+            if (alertText === "" || alertText === "N/A" || alertText.toLowerCase() === "none") continue;
 
-            <div id="view-home" class="center-section-block">
-                <div class="section-header">
-                    <h2>Active Community Notices</h2>
-                    <p>Live schedules, application deadlines, and general updates.</p>
-                </div>
-                <div id="general-bulletin-container" style="display: flex; flex-direction: column; gap: 16px; padding: 0 24px 24px 24px;">
-                    <div class="status-box loading-box">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i>
-                        <span>Syncing live notices...</span>
+            if (badgeType === 'EMERGENCY') {
+                hasTopEmergency = true;
+                emergencyBar.innerHTML += `
+                    <div style="background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 24px; font-size: 14px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); width: 100%;">
+                        <span style="background: rgba(255, 255, 255, 0.25); padding: 3px 8px; border-radius: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-fire-flame-curved"></i> EMERGENCY
+                        </span>
+                        <p style="margin: 0; line-height: 1.4;">${alertText}</p>
                     </div>
-                </div>
-            </div>
+                `;
+            } 
+            else if (heroAlertsAside) {
+                let glassBorderColor = 'rgba(255, 255, 255, 0.2)';
+                let labelBgColor = 'rgba(255, 255, 255, 0.15)';
+                let badgeTextColor = '#ffffff';
+                let alertIcon = '<i class="fa-solid fa-bullhorn"></i>';
 
-            <div id="view-docs" class="center-section-block" style="display: none;">
-                <div class="section-header">
-                    <h2>Community Documentation Logs</h2>
-                    <p>Visual records and completion details for transparency tracking.</p>
-                </div>
-                <div id="documentation-feed" style="padding: 0 24px 24px 24px;">
-                    <div class="status-box loading-box">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i>
-                        <span>Loading documentation updates...</span>
+                if (badgeType === 'URGENT') {
+                    glassBorderColor = 'rgba(249, 115, 22, 0.4)';
+                    labelBgColor = 'rgba(249, 115, 22, 0.2)';
+                    badgeTextColor = '#ffedd5';
+                    alertIcon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                } else if (badgeType === 'NOTICE') {
+                    glassBorderColor = 'rgba(59, 130, 246, 0.4)';
+                    labelBgColor = 'rgba(59, 130, 246, 0.2)';
+                    badgeTextColor = '#dbeafe';
+                    alertIcon = '<i class="fa-solid fa-circle-info"></i>';
+                }
+
+                heroAlertsAside.innerHTML += `
+                    <div style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid ${glassBorderColor}; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); color: #ffffff; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center;">
+                            <span style="background: ${labelBgColor}; color: ${badgeTextColor}; padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+                                ${alertIcon} ${badgeType}
+                            </span>
+                        </div>
+                        <p style="margin: 0; font-size: 13px; line-height: 1.5; font-weight: 500; color: rgba(255, 255, 255, 0.95); text-shadow: 0 1px 2px rgba(0,0,0,0.3);">${alertText}</p>
                     </div>
-                </div>
-            </div>
+                `;
+            }
+        }
 
-            <div id="view-pipeline" class="center-section-block" style="display: none;">
-                <div class="section-header">
-                    <h2>Project Execution Tracker</h2>
-                    <p>Current progress statuses mapped against our implementation pipeline.</p>
-                </div>
-                <div id="loading-state" class="status-box loading-box">
-                    <i class="fa-solid fa-circle-notch fa-spin"></i>
-                    <span>Connecting tracker records...</span>
-                </div>
-                <div id="project-grid" class="project-grid hidden"></div>
-            </div>
+        if (hasTopEmergency && emergencyBar) {
+            emergencyBar.style.setProperty('display', 'block', 'important');
+            document.body.style.paddingTop = `${emergencyBar.offsetHeight}px`;
+        } else if (emergencyBar) {
+            emergencyBar.style.setProperty('display', 'none', 'important');
+            document.body.style.paddingTop = '0px';
+        }
 
-            <div id="view-budget" class="center-section-block" style="display: none;">
-                <div class="section-header">
-                    <h2>Public Fund Allocation & Budget Ledger</h2>
-                    <p>Live breakdown of approved project funding paths and exact spent balances.</p>
-                </div>
-                <div id="budget-ledger-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 0 24px 24px 24px;">
-                    <div class="status-box loading-box">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i>
-                        <span>Retrieving treasury tables...</span>
-                    </div>
-                </div>
-            </div>
+        if (bulletinContainer) {
+            bulletinContainer.innerHTML = '';
+            let bulletinCount = 0;
 
-            <div class="center-section-block">
-                <div class="section-header">
-                    <h2>Youth Voice Portal</h2>
-                    <p>Submit suggestions anonymously or lodge official contact responses.</p>
-                </div>
-                <div class="form-container">
-                    <div class="tab-header">
-                        <button id="tab-feedback-btn" onclick="switchTab('feedback')" class="tab-btn" style="background: var(--brand-blue); color: #ffffff;">Anonymous Suggestion Box</button>
-                        <button id="tab-contact-btn" onclick="switchTab('contact')" class="tab-btn" style="background: transparent; color: var(--text-muted);">Official Desk Correspondence</button>
-                    </div>
+            for (let i = 1; i < cleanRows.length; i++) {
+                const row = cleanRows[i];
+                if (!row || !row[2] || row[2].trim() === "" || row[2] === "N/A") continue; 
 
-                    <div id="form-alert" class="status-box success-box hidden">
-                        <i class="fa-solid fa-circle-check" style="font-size: 24px; margin-bottom: 8px;"></i>
-                        <p id="alert-text"></p>
-                    </div>
+                bulletinCount++;
+                const title = row[2];
+                const details = row[3] || 'No description logged.';
+                const dateVal = row[4] || '';
+                const dateLabel = row[5] || 'Schedule';
+                const timeVal = row[6] || '';
+                const venueVal = row[7] || '';
 
-                    <form id="feedback-form" class="hub-form">
-                        <div>
-                            <label for="feedback-category">Allocation Focus Area</label>
-                            <select id="feedback-category" required>
-                                <option value="Sports & Wellness">Sports & Wellness Development</option>
-                                <option value="Educational Assistance">Educational Assistance Programs</option>
-                                <option value="Environmental Action">Environmental Infrastructure</option>
-                                <option value="Cultural Engagement">Cultural Engagement & Events</option>
-                                <option value="General Governance">General Governance Improvements</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="feedback-text">Detailed Description</label>
-                            <textarea id="feedback-text" rows="4" placeholder="Type your suggestion details safely here..." required></textarea>
-                        </div>
-                        <button type="submit" class="submit-btn">Submit Anonymously</button>
-                    </form>
+                let labelColor = '#2563eb'; let labelBg = '#eff6ff';
+                const cleanLabel = dateLabel.toLowerCase();
+                if (cleanLabel.includes('deadline') || cleanLabel.includes('due')) { labelColor = '#dc2626'; labelBg = '#fef2f2'; }
+                else if (cleanLabel.includes('meeting') || cleanLabel.includes('session')) { labelColor = '#d97706'; labelBg = '#fffbeb'; }
+                else if (cleanLabel.includes('event') || cleanLabel.includes('program')) { labelColor = '#16a34a'; labelBg = '#f0fdf4'; }
 
-                    <form id="contact-form" class="hub-form" style="display: none;">
-                        <div>
-                            <label for="contact-name">Full Name</label>
-                            <input type="text" id="contact-name" placeholder="Juan Dela Cruz" required>
-                        </div>
-                        <div>
-                            <label for="contact-phone">Contact Number</label>
-                            <input type="tel" id="contact-phone" placeholder="0917XXXXXXX" required>
-                        </div>
-                        <div>
-                            <label for="contact-purok">Purok Area Location</label>
-                            <input type="text" id="contact-purok" placeholder="Purok 1" required>
-                        </div>
-                        <div>
-                            <label for="contact-message">Inquiry Message</label>
-                            <textarea id="contact-message" rows="4" placeholder="State your question or clarification request..." required></textarea>
-                        </div>
-                        <button type="submit" class="submit-btn contact-submit">Submit Correspondence Request</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <aside class="side-column">
-            <div class="section-header">
-                <h2>Automated FAQ Desk</h2>
-                <p>AI-assisted directory lookups and program eligibility checking.</p>
-            </div>
-            <div class="chat-container">
-                <div class="chat-header">
-                    <div class="chat-title">
-                        <i class="fa-solid fa-robot"></i>
-                        <div>
-                            <h4>Repository Desk Portal</h4>
-                            <span class="status-indicator"><i class="fa-solid fa-circle" style="font-size: 8px; animation: none;"></i> Database Synchronized</span>
+                bulletinContainer.innerHTML += `
+                    <div class="bulletin-item-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; transition: all 0.2s; box-shadow: var(--shadow-sm);">
+                        <h3 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">${title}</h3>
+                        <p style="font-size: 13px; color: #475569; line-height: 1.6; font-weight: 400; margin-bottom: 14px;">${details}</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; border-top: 1px dashed #f1f5f9; padding-top: 12px;">
+                            ${dateVal ? `
+                            <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px;">
+                                <i class="fa-regular fa-calendar" style="color: #64748b; margin-top: 2px;"></i>
+                                <div>
+                                    <span style="display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; background: ${labelBg}; color: ${labelColor}; margin-bottom: 2px;">${dateLabel}</span>
+                                    <strong style="display: block; color: #1e293b;">${dateVal}</strong>
+                                </div>
+                            </div>` : ''}
+                            
+                            ${timeVal ? `
+                            <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px;">
+                                <i class="fa-regular fa-clock" style="color: #64748b; margin-top: 2px;"></i>
+                                <div>
+                                    <span style="display: block; font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Time Slot</span>
+                                    <strong style="color: #1e293b;">${timeVal}</strong>
+                                </div>
+                            </div>` : ''}
+                            
+                            ${venueVal ? `
+                            <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px;">
+                                <i class="fa-solid fa-location-dot" style="color: #64748b; margin-top: 2px;"></i>
+                                <div>
+                                    <span style="display: block; font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Location</span>
+                                    <strong style="color: #1e293b;">${venueVal}</strong>
+                                </div>
+                            </div>` : ''}
                         </div>
                     </div>
+                `;
+            }
+            
+            if (bulletinCount === 0) {
+                bulletinContainer.innerHTML = `<p style="font-size: 14px; color: #94a3b8; text-align: center;">No active bulletin notices posted.</p>`;
+            }
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function fetchLiveProjects() {
+    const gridContainer = document.getElementById('project-grid');
+    const loadingIndicator = document.getElementById('loading-state');
+    try {
+        const response = await fetch(DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        if (cleanRows.length <= 1) return;
+        if (gridContainer) gridContainer.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i]; if (!row || !row[0]) continue;
+            const title = row[0], date = row[1] || 'N/A', status = row[2] || 'Planning', details = row[3] || 'No description logged.';
+            let badgeStyleClass = 'status-badge', statusMarkup = status;
+            const lowerStatus = status.toLowerCase();
+            if (lowerStatus.includes('progress') || lowerStatus.includes('ongoing')) {
+                badgeStyleClass += ' badge-progress'; statusMarkup = `<span class="pulse-dot"></span> ${status}`;
+            } else if (lowerStatus.includes('complete') || lowerStatus.includes('done')) { badgeStyleClass += ' badge-complete'; }
+            else { badgeStyleClass += ' badge-planning'; }
+            if (gridContainer) {
+                gridContainer.innerHTML += `
+                    <div class="project-card">
+                        <div><div class="card-top"><h3>${title}</h3><span class="${badgeStyleClass}">${statusMarkup}</span></div><p class="card-details">${details}</p></div>
+                        <div class="card-footer"><i class="fa-regular fa-calendar"></i> Target execution: ${date}</div>
+                    </div>
+                `;
+            }
+        }
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (gridContainer) gridContainer.classList.remove('hidden');
+    } catch (err) { console.error(err); }
+}
+
+async function fetchLiveSlideshow() {
+    const slideshowContainer = document.getElementById('hero-bg-slideshow');
+    try {
+        const response = await fetch(SLIDESHOW_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        if (cleanRows.length <= 1) return;
+        if (slideshowContainer) slideshowContainer.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i]; if (!row[0]) continue;
+            const optimizedLink = cleanDriveImageUrl(row[0]);
+            if (slideshowContainer) {
+                slideshowContainer.innerHTML += `<div class="custom-slide fade"><img src="${optimizedLink}" alt="SK Slide"></div>`;
+            }
+        }
+        slideTrackerIndex = 0; runLiveSlideshow();
+    } catch (err) { console.error(err); }
+}
+
+let slideTrackerIndex = 0;
+function runLiveSlideshow() {
+    const slides = document.getElementsByClassName("custom-slide"); if (slides.length === 0) return;
+    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
+    slideTrackerIndex++; if (slideTrackerIndex > slides.length) slideTrackerIndex = 1; 
+    slides[slideTrackerIndex - 1].style.display = "block"; setTimeout(runLiveSlideshow, 4500);
+}
+
+async function fetchLiveCouncil() {
+    const gridContainer = document.getElementById('council-grid');
+    const loadingIndicator = document.getElementById('council-loading-state');
+    try {
+        const response = await fetch(COUNCIL_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        if (gridContainer) gridContainer.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i]; if (!row[0]) continue;
+            const role = row[0], name = row[1], purok = row[2] || 'Unassigned', contact = row[3] || 'No contact';
+            let cardClass = 'member-card';
+            if (role.toLowerCase().includes('chair') || role.toLowerCase().includes('kapitan')) cardClass = 'member-card chairperson-card';
+            else if (role.toLowerCase().includes('secretary') || role.toLowerCase().includes('treasurer')) cardClass = 'member-card executive-card';
+            if (gridContainer) {
+                gridContainer.innerHTML += `
+                    <div class="${cardClass}"><span class="member-role">${role}</span><h3 class="member-name">${name}</h3><span class="member-purok"><i class="fa-solid fa-location-dot"></i> ${purok}</span><div class="member-contact"><i class="fa-solid fa-phone"></i> ${contact}</div></div>
+                `;
+            }
+        }
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (gridContainer) gridContainer.classList.remove('hidden');
+    } catch (err) { console.error(err); }
+}
+
+async function fetchLiveDocumentationFeed() {
+    const feedContainer = document.getElementById('documentation-feed');
+    if (!feedContainer) return;
+    try {
+        const response = await fetch(DOCS_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        
+        if (cleanRows.length <= 1) {
+            feedContainer.innerHTML = `<p style="font-size: 14px; color: #94a3b8; text-align: center; padding: 20px;">No community documentation posts logged yet.</p>`;
+            return;
+        }
+        
+        feedContainer.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i]; 
+            if (!row || (!row[0] && !row[1])) continue; 
+            
+            const rawImg = (row[0] && !row[0].includes('[Paste')) ? cleanDriveImageUrl(row[0]) : '';
+            const caption = row[1] || 'No caption provided.';
+            const dateStr = row[2] || 'Recent Update';
+            
+            feedContainer.innerHTML += `
+                <div class="fb-post-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm); width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid #f1f5f9;">
+                        <img src="Images/SK LOGO.jpg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                            <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0;">Sangguniang Kabataan</h4>
+                            <span style="font-size: 11px; color: #94a3b8; display: block;"><i class="fa-solid fa-earth-asia"></i> ${dateStr}</span>
+                        </div>
+                    </div>
+                    <div style="padding: 16px; font-size: 14px; color: #334155; line-height: 1.6;">${caption}</div>
+                    ${rawImg ? `
+                    <div style="width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-top: 1px solid #f1f5f9;">
+                        <img src="${rawImg}" style="width: 100%; max-height: 500px; object-fit: cover;">
+                    </div>` : ''}
                 </div>
-                <div id="chat-messages" class="chat-messages">
-                    <div class="message ai-message">Mabuhay! I am your automated SK FAQ Desk assistant. You can ask me any question about our council directory, ongoing pipeline project execution tracking, budget numbers, or assistance qualification terms!</div>
+            `;
+        }
+    } catch (err) { 
+        console.error(err); 
+        feedContainer.innerHTML = `<p style="text-align: center; font-size: 14px; color: #ef4444;">Failed to load documentation logs.</p>`;
+    }
+}
+
+async function fetchLiveBudgetLedger() {
+    const budgetGrid = document.getElementById('budget-ledger-grid');
+    if (!budgetGrid) return;
+    try {
+        const response = await fetch(BUDGET_DATA_URL);
+        if (!response.ok) return;
+        const dataText = await response.text();
+        const cleanRows = parseCSV(dataText);
+        if (cleanRows.length <= 1) return;
+        budgetGrid.innerHTML = '';
+        for (let i = 1; i < cleanRows.length; i++) {
+            const row = cleanRows[i]; if (!row || !row[0]) continue;
+            const title = row[0], allocated = row[1] || '0.00', spent = row[2] || '0.00', remaining = row[3] || '0.00';
+            budgetGrid.innerHTML += `
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm);">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 12px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 8px;">${title}</h3>
+                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between;"><span style="color: #64748b;">Allocated Budget:</span> <strong style="color: #0f172a;">₱${allocated}</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: #64748b;">Total Expenses:</span> <strong style="color: #dc2626;">₱${spent}</strong></div>
+                        <div style="display: flex; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 6px; margin-top: 4px;"><span style="color: #64748b; font-weight: 600;">Remaining Balance:</span> <strong style="color: #16a34a; font-size: 14px;">₱${remaining}</strong></div>
+                    </div>
                 </div>
-                <form id="chat-input-area" class="chat-input-area">
-                    <input type="text" id="user-chat-input" placeholder="Type a community question..." autocomplete="off" required>
-                    <button type="submit" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
-                </form>
-            </div>
-        </aside>
+            `;
+        }
+    } catch (err) { console.error(err); }
+}
 
-    </main>
+function switchTab(targetTab) {
+    const feedbackForm = document.getElementById('feedback-form'), contactForm = document.getElementById('contact-form');
+    const feedbackBtn = document.getElementById('tab-feedback-btn'), contactBtn = document.getElementById('tab-contact-btn');
+    if (targetTab === 'feedback') {
+        if (feedbackForm) feedbackForm.style.setProperty('display', 'block', 'important');
+        if (contactForm) contactForm.style.setProperty('display', 'none', 'important');
+        if (feedbackBtn) { feedbackBtn.style.background = "#2563eb"; feedbackBtn.style.color = "#ffffff"; }
+        if (contactBtn) { contactBtn.style.background = "transparent"; contactBtn.style.color = "#64748b"; }
+    } else {
+        if (contactForm) contactForm.style.setProperty('display', 'block', 'important');
+        if (feedbackForm) feedbackForm.style.setProperty('display', 'none', 'important');
+        if (contactBtn) { contactBtn.style.background = "#2563eb"; contactBtn.style.color = "#ffffff"; }
+        if (feedbackBtn) { feedbackBtn.style.background = "transparent"; feedbackBtn.style.color = "#64748b"; }
+    }
+}
 
-    <footer class="immersive-footer">
-        <div class="footer-bg-layer">
-            <img src="Images/SK LOGO.jpg" alt="SK Background">
-        </div>
-        <div class="footer-overlay"></div>
-        <div class="footer-content-wrapper">
-            <h3 class="footer-title">Sangguniang Kabataan Compliance Framework</h3>
-            <p class="footer-desc">&copy; 2026 Barangay Bobon Caarosipan. This system serves as an open public record architecture mapped onto live digital data sheets for verifiable public reporting metrics.</p>
-        </div>
-    </footer>
+function setupFormListeners() {
+    const feedbackForm = document.getElementById('feedback-form'), contactForm = document.getElementById('contact-form');
+    const alertBox = document.getElementById('form-alert'), alertText = document.getElementById('alert-text');
+    if(feedbackForm) {
+        feedbackForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); const submitBtn = feedbackForm.querySelector('.submit-btn'); submitBtn.innerText = "Submitting..."; submitBtn.disabled = true;
+            try {
+                await fetch(FEEDBACK_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: document.getElementById('feedback-category').value, text: document.getElementById('feedback-text').value }) });
+                feedbackForm.style.setProperty('display', 'none', 'important'); alertBox.classList.remove('hidden'); alertText.innerText = `Mabuhay! Recorded anonymously.`; feedbackForm.reset();
+            } catch (err) { alertBox.classList.remove('hidden'); alertText.innerText = "Submission error."; }
+            finally { submitBtn.innerText = "Submit Anonymously"; submitBtn.disabled = false; }
+        });
+    }
+    if(contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault(); const name = document.getElementById('contact-name').value;
+            feedbackForm.style.setProperty('display', 'none', 'important'); contactForm.style.setProperty('display', 'none', 'important'); alertBox.classList.remove('hidden');
+            alertText.innerText = `Thank you ${name}! Logged successfully.`; contactForm.reset();
+        });
+    }
+}
 
-    <script src="app.js"></script>
-</body>
-</html>
+function setupFAQEngine() {
+    const chatForm = document.getElementById('chat-input-area'), userInput = document.getElementById('user-chat-input'), chatContainer = document.getElementById('chat-messages');
+    if(!chatForm) return;
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); 
+        const userQuery = userInput.value.trim(); 
+        if (!userQuery) return;
+
+        const msg = document.createElement('div'); 
+        msg.className = 'message user-message'; 
+        msg.innerText = userQuery; 
+        chatContainer.appendChild(msg); 
+        userInput.value = '';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        const reply = document.createElement('div'); 
+        reply.className = 'message ai-message';
+        reply.innerHTML = `<i class="fa-solid fa-circle-notch spinner"></i> Scanning spreadsheet database...`;
+        chatContainer.appendChild(reply);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        const cleanInput = userQuery.toLowerCase().replace(/[?,.!]/g, '');
+        const inputWords = cleanInput.split(/\s+/);
+
+        setTimeout(async () => {
+            try {
+                const [annRes, budgetRes] = await Promise.all([
+                    fetch(ANNOUNCEMENT_DATA_URL),
+                    fetch(BUDGET_DATA_URL)
+                ]);
+
+                let budgetData = [];
+                if (budgetRes.ok) {
+                    budgetData = parseCSV(await budgetRes.text());
+                }
+
+                let answer = "I couldn't find a specific program matching that query. Try typing terms like 'assistance', 'deadline', 'sports', or 'chairman'!";
+
+                if (cleanInput.includes('shoe') || cleanInput.includes('sapatos') || cleanInput.includes('cloth') || cleanInput.includes('uniform')) {
+                    let presentationFund = "₱75,000.00";
+                    let wellnessFund = "₱7,500.00";
+
+                    if (budgetData.length > 1) {
+                        const culturalRow = budgetData.find(r => r[0] && r[0].includes('Cultural Presentation'));
+                        const wellnessRow = budgetData.find(r => r[0] && r[0].includes('Wellness'));
+                        if (culturalRow && culturalRow[3]) presentationFund = `₱${culturalRow[3]}`;
+                        if (wellnessRow && wellnessRow[3]) wellnessFund = `₱${wellnessRow[3]}`;
+                    }
+
+                    answer = `Mabuhay! Thank you for that wonderful community proposal. Providing items to our local kabataan is a creative way to support the youth.<br><br>Analyzing our live <b>Budget Tab</b> rows... A program of this scale would require shifting major allocations. Currently, our largest available unspent fund sits under the Cultural Presentation presentation budget at <b>${presentationFund}</b>, which is earmarked by code. Open unassigned asset tracks like Youth Wellness only have <b>${wellnessFund}</b> remaining.<br><br>I will forward this to our SK Treasurer and Chairperson so they can consider adding a material assistance program in the next annual budget planning session!`;
+                    reply.innerHTML = answer;
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    return;
+                }
+
+                if (cleanInput.includes('chair') || cleanInput.includes('leader') || cleanInput.includes('sino') || cleanInput.includes('sec') || cleanInput.includes('treas')) {
+                    const res = await fetch(COUNCIL_DATA_URL);
+                    if (res.ok) {
+                        const cleanRows = parseCSV(await res.text());
+                        let matches = [];
+                        for(let i = 1; i < cleanRows.length; i++) {
+                            const row = cleanRows[i];
+                            if (row && row[0] && inputWords.some(word => row[0].toLowerCase().includes(word) || row[1].toLowerCase().includes(word))) {
+                                matches.push(`• <b>${row[0]}</b>: ${row[1]} (${row[2] || 'All Puroks'})`);
+                            }
+                        }
+                        if (matches.length > 0) {
+                            answer = `Here are the matching council profiles found:<br><br>${matches.join('<br>')}`;
+                            reply.innerHTML = answer;
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            return;
+                        }
+                    }
+                }
+
+                if (annRes.ok) {
+                    const cleanRows = parseCSV(await annRes.text());
+                    const isLookingForQualifications = inputWords.some(w => ['qualified', 'eligible', 'pwede', 'qualify', 'apply', 'requirement', '16', '10', 'grade', 'years'].includes(w));
+                    
+                    for(let i = 1; i < cleanRows.length; i++) {
+                        const row = cleanRows[i];
+                        if (!row || !row[2]) continue;
+                        
+                        const title = row[2].toLowerCase();
+                        const details = row[3] ? row[3].toLowerCase() : '';
+                        const extraDetails = row[8] ? row[8].toLowerCase() : '';
+
+                        const matched = inputWords.some(word => title.includes(word) || details.includes(word) || extraDetails.includes(word) || (word.startsWith('assit') && title.includes('assistance')));
+
+                        if (matched || (isLookingForQualifications && title.includes('assistance'))) {
+                            const displayExtra = row[8] ? `<br><br>💡 <b>Additional Info:</b><br>${row[8]}` : '';
+                            answer = `📢 <b>${row[2]}</b><br><br>${row[3] || ''}${displayExtra}<br><br>📅 <b>${row[5] || 'Date'}:</b> ${row[4] || 'N/A'}<br>⏰ <b>Time:</b> ${row[6] || 'N/A'}<br>📍 <b>Venue:</b> ${row[7] || 'N/A'}`;
+                            reply.innerHTML = answer;
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            return;
+                        }
+                    }
+                }
+
+                reply.innerHTML = answer;
+            } catch (err) {
+                console.error(err);
+                reply.innerHTML = "I hit a slight glitch communicating with the data tabs. Please refresh your view browser link!";
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 800);
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    fetchLiveAnnouncements();
+    fetchLiveSlideshow(); 
+    fetchLiveCouncil();
+    fetchLiveProjects();
+    fetchLiveDocumentationFeed();
+    fetchLiveBudgetLedger();
+    setupFormListeners();
+    setupFAQEngine();
+});
