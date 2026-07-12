@@ -3,88 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sangguniang Kabataan Portal</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>SK Barangay Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
 
-    <div id="emergency-announcement" class="announcement-banner"></div>
+    <div id="emergency-announcement" class="announcement-banner" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; display: none; background: #ef4444; color: white;"></div>
 
-    <header class="immersive-hero">
+    <header class="hero-banner immersive-hero" style="margin-top: 0; min-height: 65vh; padding: 100px 4% 80px 4%;">
         <div id="hero-bg-slideshow" class="hero-bg-slideshow"></div>
         <div class="hero-overlay"></div>
-        <div style="margin: 0 auto; width: 100%; max-width: 1600px; padding: 0 24px;">
-            <div class="hero-content-wrapper">
+
+        <div class="hero-content-wrapper" style="max-width: 1500px; width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; flex-wrap: wrap; margin: 0 auto;">
+            
+            <div class="hero-content-layer" style="flex: 1; min-width: 320px; max-width: 750px;">
                 <div class="hero-brand-area">
-                    <img src="Images/SK LOGO.jpg" alt="SK Logo" class="sk-logo">
+                    <img src="Images/SK LOGO.jpg" alt="SK LOGO" class="sk-logo">
                     <div class="hero-brand-titles">
                         <h1>Sangguniang Kabataan</h1>
                         <p>Barangay Bobon Caarosipan</p>
                     </div>
                 </div>
                 <span class="transparency-badge">Official Transparency Hub</span>
-                <h2 class="hero-title">Youth Leadership & Public Ledger</h2>
-                <p class="hero-desc">Access live local council resolutions, public resource allocations, project updates, and direct development indicators tracking community assets.</p>
+                <h2 class="hero-title">Our Plans Are Active.<br>Our Records Are Open.</h2>
+                <p class="hero-desc">
+                    Track all our programs, target timelines, and live execution records in real-time. We promise that we will do our best to make every single community project possible for the youth.
+                </p>
             </div>
+
+            <div id="hero-alerts-aside" style="flex: 1; min-width: 320px; max-width: 450px; display: flex; flex-direction: column; gap: 16px; margin-top: 20px;"></div>
+            
         </div>
     </header>
 
     <main class="dashboard-viewport-grid">
-
-        <aside class="side-column">
-            <div class="section-header">
+        
+        <section id="council" class="dashboard-panel side-column">
+            <div class="section-header council-header">
                 <h2>SK Council Directory</h2>
                 <p>Official youth leaders assigned to your specific area.</p>
             </div>
-            <div id="council-grid" class="council-grid">
-                <div id="council-loading-state" class="status-box loading-box">
-                    <i class="fa-solid fa-circle-notch fa-spin"></i>
-                    <span>Loading council members...</span>
-                </div>
+            <div id="council-loading-state" class="status-box loading-box">
+                <i class="fa-solid fa-circle-notch spinner"></i>
+                <p>Loading profiles...</p>
             </div>
-        </aside>
-
-        <section class="dashboard-panel">
-            
-            <nav style="display: flex; gap: 8px; background: #ffffff; padding: 12px 24px; border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.6); box-shadow: var(--shadow-sm); overflow-x: auto; white-space: nowrap;">
-                <button onclick="navigateCenterView('view-home')" class="tab-btn" style="background: var(--brand-blue); color: white;">General Bulletin</button>
-                <button onclick="navigateCenterView('view-docs')" class="tab-btn" style="background: transparent; color: var(--text-secondary);">Documentation</button>
-                <button onclick="navigateCenterView('view-pipeline')" class="tab-btn" style="background: transparent; color: var(--text-secondary);">Project Tracker</button>
-                <button onclick="navigateCenterView('view-budget')" class="tab-btn" style="background: transparent; color: var(--text-secondary);">Treasury Balance</button>
-            </nav>
-
-            <div id="view-home" class="center-section-block">
-                <div class="section-header">
-                    <h2>Active Community Notices</h2>
-                </div>
-                <!-- Bulletin Sections -->
-                <div id="general-bulletin-container" style="padding: 0 24px 24px 24px;"></div>
-                
-                <div class="section-header">
-                    <h2>Recent History (Past 30 Days)</h2>
-                </div>
-                <div id="recent-history-container" style="padding: 0 24px 24px 24px;"></div>
-
-                <div class="section-header">
-                    <h2>Permanent Archive</h2>
-                </div>
-                <div id="permanent-archive-container" style="padding: 0 24px 24px 24px;"></div>
-            </div>
-
-            <!-- Other Views (Docs, Pipeline, Budget) remain here -->
-            <div id="view-docs" class="center-section-block" style="display: none;"></div>
-            <div id="view-pipeline" class="center-section-block" style="display: none;"></div>
-            <div id="view-budget" class="center-section-block" style="display: none;"></div>
-
+            <div id="council-grid" class="council-grid hidden"></div>
         </section>
 
-        <aside class="side-column">
-            <!-- FAQ Desk remains here -->
-        </aside>
+        <div class="dashboard-panel center-column">
+            
+            <div class="sub-nav-header-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: var(--shadow-sm);">
+                <div style="font-weight: 800; font-size: 14px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-layer-group" style="color: #2563eb;"></i> 
+                    <span>Select Portal View:</span>
+                </div>
+                <select id="portal-view-selector" onchange="navigateCenterView(this.value, '')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-family: inherit; font-size: 13px; font-weight: 700; color: #334155; outline: none; cursor: pointer; width: 220px;">
+                    <option value="view-home">⚙️ Home & Bulletin</option>
+                    <option value="view-docs">📸 Photo Gallery</option>
+                    <option value="view-pipeline">📊 Project Pipeline</option>
+                    <option value="view-budget">📂 Budget Allocation</option>
+                </select>
+            </div>
+
+            <div id="view-home">
+                <section id="bulletin" class="center-section-block" style="margin-bottom: 32px;">
+                    <div class="section-header hub-header" style="background: #2563eb; padding: 1.5rem; border-radius: 12px 12px 0 0; color: white;">
+                        <h2 style="color: white; margin: 0;"><i class="fa-solid fa-bullhorn"></i> Barangay Bulletin Board</h2>
+                        <p style="color: #bfdbfe; margin: 4px 0 0 0;">General updates and active announcements from the council.</p>
+                    </div>
+                    <div class="form-container" style="border-top-left-radius: 0; border-top-right-radius: 0; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; box-shadow: var(--shadow-sm);">
+                        <div id="general-bulletin-container" style="display: flex; flex-direction: column; gap: 24px;">
+                            <p style="text-align: center; font-size: 14px; color: #94a3b8;"><i class="fa-solid fa-circle-notch spinner"></i> Fetching active board notices...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="plans" class="center-section-block">
+                    <div class="section-header pillar-header">
+                        <h2>CBYDP Strategic Framework</h2>
+                        <p>The core target focus pillars of our active youth council.</p>
+                    </div>
+                    <div class="pillars-grid">
+                        <div class="pillar-card">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <h3>Education & Skills</h3>
+                            <p>Providing localized review sessions, technology capability seminars, and leadership development frameworks.</p>
+                        </div>
+                        <div class="pillar-card">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                            <h3>Health & Sports</h3>
+                            <p>Grassroots sports tournaments, physical wellness distributions, and proactive localized anti-drug campaigns.</p>
+                        </div>
+                        <div class="pillar-card">
+                            <i class="fa-solid fa-seedling"></i>
+                            <h3>Environmental Action</h3>
+                            <p>Community-wide clean-up drives, plastic waste management systems, and climate accountability advocacies.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-docs" style="display: none;">
+                <div class="section-header" style="padding: 0; margin-bottom: 20px;">
+                    <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a;"><i class="fa-solid fa-images" style="color:#2563eb;"></i> Council Activities & Documentations</h2>
+                    <p style="font-size: 13px; color: #64748b;">Facebook-style event streams logged directly by our administrators.</p>
+                </div>
+                <div id="documentation-feed">
+                    <p style="text-align: center; font-size: 14px; color: #94a3b8;"><i class="fa-solid fa-circle-notch spinner"></i> Loading feed updates...</p>
+                </div>
+            </div>
+
+            <div id="view-pipeline" style="display: none;">
+                <section id="projects" class="center-section-block">
+                    <div class="section-header tracker-header">
+                        <h2>Live Project Pipeline</h2>
+                        <p>Pulled directly from our public project ledger files for real-time tracking.</p>
+                    </div>
+                    <div id="loading-state" class="status-box loading-box">
+                        <i class="fa-solid fa-circle-notch spinner"></i>
+                        <p>Reading repository ledger...</p>
+                    </div>
+                    <div id="project-grid" class="project-grid hidden"></div>
+                </section>
+            </div>
+
+            <div id="view-budget" style="display: none;">
+                <section id="budget" class="center-section-block">
+                    <div class="section-header tracker-header" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 24px;">
+                        <h2>Public Fund Allocation & Budget Ledger</h2>
+                        <p>Real-time updates regarding fund disbursements and transparency balance computations.</p>
+                    </div>
+                    <div id="budget-ledger-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 0 24px 24px 24px;">
+                        <p style="text-align: center; color: #94a3b8; font-size: 14px;"><i class="fa-solid fa-circle-notch spinner"></i> Rendering treasury books...</p>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+
+        <div class="dashboard-panel side-column flex-column-mobile" style="display: flex; flex-direction: column; gap: 32px; background: transparent; border: none; box-shadow: none; overflow: visible;">
+            
+            <section id="youth-voice" class="center-section-block" style="width: 100%;">
+                <div class="section-header hub-header" style="padding-bottom: 12px;">
+                    <h2>Youth Voice Hub</h2>
+                    <p>Submit your thoughts, suggestions, or ask questions to our officials.</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="tab-header" style="display: flex; width: 100%; justify-content: space-between; gap: 8px;">
+                        <button id="tab-feedback-btn" class="tab-btn active" onclick="switchTab('feedback')" style="flex: 1; min-width: 100px; white-space: nowrap; background: #2563eb; color: #ffffff;">
+                            <i class="fa-solid fa-comments"></i> Feedback
+                        </button>
+                        <button id="tab-contact-btn" class="tab-btn" onclick="switchTab('contact')" style="flex: 1; min-width: 100px; white-space: nowrap; background: transparent; color: #64748b;">
+                            <i class="fa-solid fa-envelope"></i> Message
+                        </button>
+                    </div>
+
+                    <form id="feedback-form" class="hub-form">
+                        <label for="feedback-category">Topic Category</label>
+                        <select id="feedback-category" required style="background: #ffffff;">
+                            <option value="" disabled selected>Select a topic...</option>
+                            <option value="education">Education Programs</option>
+                            <option value="sports">Sports Tournaments</option>
+                            <option value="environment">Environmental Projects</option>
+                            <option value="general">General Suggestions</option>
+                        </select>
+                        <label for="feedback-text">Your Thoughts</label>
+                        <textarea id="feedback-text" placeholder="Write suggestions here..." rows="3" required style="background: #ffffff;"></textarea>
+                        <button type="submit" class="submit-btn">Submit Anonymously</button>
+                    </form>
+
+                    <form id="contact-form" class="hub-form hidden">
+                        <label for="contact-name">Full Name</label>
+                        <input type="text" id="contact-name" placeholder="Juan Dela Cruz" required style="background: #ffffff;">
+                        <label for="contact-email">Contact Info</label>
+                        <input type="text" id="contact-email" placeholder="0917xxxxxxx" required style="background: #ffffff;">
+                        <label for="contact-message">Message</label>
+                        <textarea id="contact-message" placeholder="Type your message to the council..." rows="2" required style="background: #ffffff;"></textarea>
+                        <button type="submit" class="submit-btn contact-submit">Send Message</button>
+                    </form>
+
+                    <div id="form-alert" class="status-box success-box hidden">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <p id="alert-text"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ai-assistant" class="center-section-block" style="width: 100%;">
+                <div class="section-header ai-header" style="padding-bottom: 12px;">
+                    <h2>SK AI Assistant</h2>
+                    <p>Instant answers regarding our schedules, hubs, and programs.</p>
+                </div>
+
+                <div class="chat-container" style="border-radius: 0;">
+                    <div class="chat-header">
+                        <div class="chat-title">
+                            <i class="fa-solid fa-robot"></i>
+                            <div>
+                                <h4>SK Automated FAQ Desk</h4>
+                                <span class="status-indicator">● Online Support</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="chat-messages" class="chat-messages" style="height: 200px;">
+                        <div class="message ai-message">
+                            Mabuhay! Ask me basic questions about our programs or event schedules below!
+                        </div>
+                    </div>
+                    <form id="chat-input-area" class="chat-input-area">
+                        <input type="text" id="user-chat-input" placeholder="Type a keyword..." autocomplete="off" required style="background: #ffffff;">
+                        <button type="submit" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </section>
+
+        </div>
 
     </main>
+
+    <footer class="footer-banner immersive-footer">
+        <div class="footer-bg-layer">
+            <img src="documentation/slide1.jpg" alt="SK Council Community Backdrop">
+        </div>
+        <div class="footer-overlay"></div>
+        <div class="footer-content-wrapper">
+            <p class="footer-title">SANGGUNIANG KABATAAN DIARY ENGINE</p>
+            <p class="footer-desc">Administered via custom static frontend frameworks dynamically linked to secure cloud spreadsheet database ledgers.</p>
+        </div>
+    </footer>
 
     <script src="app.js"></script>
 </body>
